@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     NetworkAccessManagerFactory factory;
 
     Controller &controller = Controller::instance();
-    controller.bindToQml(view);
+    controller.bindToQml();
 
     Settings::bindToQml();
 

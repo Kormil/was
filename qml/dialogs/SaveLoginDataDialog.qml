@@ -34,7 +34,7 @@ Dialog {
 
             Label {
                 text: qsTr("Do you want to save login data?")
-                anchors.top: header.bottom
+                //anchors.top: header.bottom
                 x: Theme.horizontalPageMargin
                 color: Theme.highlightColor
             }

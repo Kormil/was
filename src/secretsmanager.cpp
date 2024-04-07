@@ -26,11 +26,13 @@ void SecretsManager::isCollectionExistsInSecretsManager(std::function<void(void)
     QObject::connect(request_raw_ptr, &Sailfish::Secrets::CollectionNamesRequest::collectionNamesChanged, [serial, handler, this]() {
         SecretRequestPtr request;
         if (auto search = requests_.find(serial); search != requests_.end()) {
+            if (search->second->status() != Sailfish::Secrets::Request::Finished) {
+                return;
+            }
+
             request = search->second;
             requests_.erase(serial);
-        }
-
-        if (!request) {
+        } else {
             qWarning() << "Cannot find CollectionNamesRequest with serial: " << serial;
             return;
         }
@@ -69,11 +71,13 @@ void SecretsManager::createSecretsCollection(std::function<void(void)> handler) 
     QObject::connect(request_raw_ptr, &Sailfish::Secrets::CreateCollectionRequest::statusChanged, [serial, handler, this]() {
         SecretRequestPtr request;
         if (auto search = requests_.find(serial); search != requests_.end()) {
+            if (search->second->status() != Sailfish::Secrets::Request::Finished) {
+                return;
+            }
+
             request = search->second;
             requests_.erase(serial);
-        }
-
-        if (!request) {
+        } else {
             qWarning() << "Cannot find CreateCollectionRequest with serial: " << serial;
             return;
         }

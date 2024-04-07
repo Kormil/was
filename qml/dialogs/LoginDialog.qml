@@ -3,6 +3,7 @@ import Sailfish.Silica 1.0
 
 import Controller 1.0
 import Settings 1.0
+import FileListModel 1.0
 
 Dialog {
     id: page
@@ -10,6 +11,8 @@ Dialog {
     Component.onCompleted: {
         Settings.loadPassword()
     }
+
+    property FileListModel fileListModel
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -21,6 +24,8 @@ Dialog {
         Settings.quickconnect = quickconnect.text
         Settings.userLogin = loginField.text
         Settings.password = passwordField.text
+
+        Controller.login(fileListModel, quickconnect.text, loginField.text, passwordField.text)
     }
 
     SilicaListView {

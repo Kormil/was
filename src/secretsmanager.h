@@ -36,7 +36,7 @@ private:
     std::atomic_uint serial_ = {0};
     std::unordered_map<unsigned int, SecretRequestPtr> requests_;
 
-    const QString COLLECTION_NAME = "was_secrets";
+    const QString COLLECTION_NAME = "WasSecrets";
 };
 
 #endif // SETTINGS_H

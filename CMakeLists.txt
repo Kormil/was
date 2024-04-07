@@ -15,6 +15,10 @@ set(KORPHO_SOURCES
     src/connection/connection.cpp
     src/connection/controller.cpp
     src/connection/request.cpp
+    src/types/file.cpp
+    src/types/filelist.cpp
+    src/types/filesmanager.cpp
+    src/models/filelistmodel.cpp
     src/settings.cpp
     src/secretsmanager.cpp
     src/harbour-was.cpp

@@ -1,8 +1,23 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import FileListModel 1.0
+import Controller 1.0
+
 Page {
+    property int download_id: 0;
+
     id: page
+
+    FileListModel {
+        id: fileListModel
+    }
+
+    Component.onCompleted: {
+        if (page.download_id !== 0) {
+            Controller.contentOfPhotoDirectory(page.download_id, fileListModel)
+        }
+    }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -15,29 +30,50 @@ Page {
         PullDownMenu {
             MenuItem {
                 text: qsTr("Login")
-                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
+                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {fileListModel: fileListModel})
             }
         }
 
-        // Tell SilicaFlickable the height of its content.
-        contentHeight: column.height
+        //contentHeight: listView.height
 
-        // Place our content in a Column.  The PageHeader is always placed at the top
-        // of the page, followed by our content.
-        Column {
-            id: column
+        SilicaListView {
+            id: listView
 
-            width: page.width
-            spacing: Theme.paddingLarge
-            PageHeader {
-                title: qsTr("UI Template")
+            model: fileListModel
+
+            anchors.fill: parent
+            spacing: Theme.paddingMedium
+
+            header: PageHeader {
+                id: title
+                title: qsTr("Photos")
             }
-            Label {
-                x: Theme.horizontalPageMargin
-                text: qsTr("Hello Sailors")
-                color: Theme.secondaryHighlightColor
-                font.pixelSize: Theme.fontSizeExtraLarge
+
+            delegate: ListItem {
+                contentHeight: Theme.itemSizeSmall
+
+                Rectangle {
+                    anchors.fill: parent
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.10) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+
+                Label {
+                    id: fileLabel
+                    text: model.name
+                    height: Theme.itemSizeSmall
+                    anchors.centerIn: parent
+                }
+
+                onClicked: {
+                    console.info(model.id)
+                    var new_page = pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id})
+                }
             }
+
+            VerticalScrollDecorator {}
         }
     }
 }

@@ -35,7 +35,7 @@ Dialog {
 
             Label {
                 text: qsTr("Do you want to log in at the start?")
-                anchors.top: header.bottom
+                //anchors.top: header.bottom
                 x: Theme.horizontalPageMargin
                 color: Theme.highlightColor
             }
