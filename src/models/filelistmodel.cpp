@@ -55,6 +55,10 @@ QHash<int, QByteArray> FileListModel::roleNames() const
 
 void FileListModel::setList(FileListPtr files)
 {
+    if (files == files_) {
+        return;
+    }
+
     beginResetModel();
 
     if (files_) {
@@ -64,9 +68,9 @@ void FileListModel::setList(FileListPtr files)
     files_ = std::move(files);
 
     if (files_) {
-        connect(files_.get(), &FileList::preItemAppended, this, [this]() {
+        connect(files_.get(), &FileList::preItemAppended, this, [this](int size) {
             const int index = files_->size();
-            beginInsertRows(QModelIndex(), index, index);
+            beginInsertRows(QModelIndex(), index, index + size);
         });
 
         connect(files_.get(), &FileList::postItemAppended, this, [this]() {

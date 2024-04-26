@@ -35,7 +35,7 @@ void Controller::bindToQml()
     // files
     qRegisterMetaType<FileListModel*>();
     qmlRegisterType<FileListModel>("FileListModel", 1, 0, "FileListModel");
-    qmlRegisterType<File>("File", 1, 0, "File");
+    //qmlRegisterType<Dir>("Dir", 1, 0, "Dir");
 }
 
 void Controller::login(FileListModel* file_list_model, QString quickconnect, QString login, QString password) {

@@ -28,10 +28,10 @@ public:
     int index(const IdType& id) const;
 
     void append(const FilePtr &file);
-    void appendList(FileListPtr &files);
+    void appendList(const FileListPtr &files);
 
 signals:
-    void preItemAppended();
+    void preItemAppended(int);
     void postItemAppended();
 
 private:

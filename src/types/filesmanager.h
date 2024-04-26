@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <mutex>
 
 #include "filelist.h"
 #include "src/connection/connection.h"
@@ -26,7 +27,10 @@ public:
 
 private:
     IdType getNextId();
+    void init(const FileListPtr &files);
     void append(const FileListPtr &files);
+
+    std::mutex file_list_iterator_mutex_;
 
     ConnectionPtr connection_;
 

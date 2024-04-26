@@ -188,11 +188,73 @@ FileListPtr Connection::parseDirectoriesAnswer(const QJsonDocument &jsonDocument
     QJsonArray results = list.toArray();
 
     for (const auto& result: results) {
-        auto file = std::make_shared<File>();
-        auto fileJson = result.toObject();
-        file->fromJson(fileJson);
+        auto dir = std::make_shared<Dir>();
+        auto dirJson = result.toObject();
+        dir->fromJson(dirJson);
 
-        files->append(file);
+        files->append(dir);
+    }
+
+    return std::move(files);
+}
+
+void Connection::contentOfDirectoryItems(IdType id, std::function<void (FileListPtr)> handler) {
+
+    QString parsedParameters;
+
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=0&limit=100&folder_id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QUrl searchUrl(url);
+
+    Request* requestRaw = request(searchUrl);
+    requestRaw->addHeader("Accept", "application/json");
+    requestRaw->addHeader("Connection", "keep-alive");
+    requestRaw->addHeader("Sec-Fetch-Dest", "document");
+    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
+    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
+
+    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
+    requestRaw->addHeader("Referer", referer.toUtf8());
+
+    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+        if (status == Request::ERROR) {
+            std::cout << "CONNECTION ERROR" << std::endl;
+            handler(nullptr);
+        } else {
+            auto response = parseDirectoryItemsAnswer(QJsonDocument::fromJson(responseArray));
+            handler(response);
+        }
+
+        deleteRequest(requestRaw->serial());
+    });
+    requestRaw->run();
+}
+
+FileListPtr Connection::parseDirectoryItemsAnswer(const QJsonDocument &jsonDocument) {
+    if (jsonDocument.isNull()) {
+        return nullptr;
+    }
+
+    FileListPtr files = std::make_shared<FileList>();
+
+    const auto& object = jsonDocument.object();
+    const auto& data = object["data"];
+    if (data.isUndefined()) {
+        return files;
+    }
+
+    const auto& list = data.toObject()["list"];
+    if (list.isUndefined()) {
+        return files;
+    }
+
+    QJsonArray results = list.toArray();
+
+    for (const auto& result: results) {
+        auto image = std::make_shared<Image>();
+        auto imageJson = result.toObject();
+        image->fromJson(imageJson);
+
+        files->append(image);
     }
 
     return std::move(files);

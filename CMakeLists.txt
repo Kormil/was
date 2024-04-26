@@ -15,7 +15,8 @@ set(KORPHO_SOURCES
     src/connection/connection.cpp
     src/connection/controller.cpp
     src/connection/request.cpp
-    src/types/file.cpp
+    src/types/dir.cpp
+    src/types/image.cpp
     src/types/filelist.cpp
     src/types/filesmanager.cpp
     src/models/filelistmodel.cpp

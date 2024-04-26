@@ -52,7 +52,7 @@ void FileList::append(const FilePtr &file)
     auto FileIt = id_to_row_.find(file->id());
 
     if (id_to_row_.end() == FileIt) {
-        emit preItemAppended();
+        emit preItemAppended(1);
 
         int row = files_.size();
         files_.push_back(file);
@@ -62,11 +62,38 @@ void FileList::append(const FilePtr &file)
     }
 }
 
-void FileList::appendList(FileListPtr &files)
+void FileList::appendList(const FileListPtr &files)
 {
-    for (auto& file: files->files_) {
-        append(file);
+    if (!files) {
+        return;
     }
 
-    files = nullptr;
+    std::vector<FilePtr> temp_files_;
+
+    for (auto& file: files->files_) {
+        auto FileIt = id_to_row_.find(file->id());
+
+        if (id_to_row_.end() != FileIt) {
+            continue;
+        }
+
+        temp_files_.push_back(file);
+    }
+
+    if (temp_files_.empty()) {
+        return;
+    }
+
+    emit preItemAppended(temp_files_.size());
+
+    int row = files_.size();
+    auto first_file_it = files_.insert(files_.end(), temp_files_.begin(), temp_files_.end());
+
+    for (; first_file_it != files_.end(); ++first_file_it, ++row) {
+        id_to_row_[first_file_it->get()->id()] = row;
+    }
+
+    emit postItemAppended();
+
+    //files = nullptr;
 }
