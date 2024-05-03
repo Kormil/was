@@ -19,6 +19,13 @@ class Image : public File {
     Q_PROPERTY(QString cache_key READ cacheKey NOTIFY cacheKeyChanged)
 
 public:
+    enum Size {
+        ORIGINAL,
+        SM,
+        M,
+        XL
+    };
+
     Image()  = default;
     Image& operator=(const Image&) = default;
     Image& operator=(Image&&) = default;
@@ -29,6 +36,10 @@ public:
     IdType parentId() const;
     QString name() const;
     QString cacheKey() const;
+
+    bool isDir() const override {
+        return false;
+    }
 
 signals:
     void idChanged();

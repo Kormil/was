@@ -7,6 +7,7 @@
 #include <sailfishapp.h>
 
 #include "src/settings.h"
+#include "src/connection/asyncimageprovider.h"
 #include "src/connection/controller.h"
 #include "src/connection/networkaccessmanagerfactory.h"
 
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
 
     Settings::bindToQml();
 
+    view->engine()->addImageProvider("photos", new AsyncImageProvider(controller));
     view->engine()->setNetworkAccessManagerFactory(&factory);
     view->setSource(SailfishApp::pathToMainQml());
     view->show();

@@ -45,6 +45,8 @@ public:
 
     QNetworkAccessManager* networkAccessManager();
 
+    void getThumbnail(Image::Size size, IdType id, QString cacheKey, std::function<void (const QImage &)> handler);
+
 protected:
     int nextSerial();
 

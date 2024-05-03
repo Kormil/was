@@ -60,6 +60,16 @@ Page {
                     }
                 }
 
+                Image {
+                    id: icon
+                    height: parent.height
+                    sourceSize.height: parent.height
+                    fillMode: Image.PreserveAspectFit
+                    source: model.is_dir ? "image://theme/icon-m-folder" : "image://photos/" + model.cache_key
+                    smooth: false
+                    cache: true
+                }
+
                 Label {
                     id: fileLabel
                     text: model.name
@@ -68,8 +78,11 @@ Page {
                 }
 
                 onClicked: {
-                    console.info(model.id)
-                    var new_page = pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id})
+                    if (model.is_dir === true) {
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id})
+                    } else {
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {fileImage: model})
+                    }
                 }
             }
 

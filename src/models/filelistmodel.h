@@ -5,6 +5,7 @@
 
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
+#include <QQuickImageProvider>
 
 #include "src/types/file.h"
 #include "src/types/filelist.h"
@@ -24,6 +25,8 @@ class FileListModel : public QAbstractListModel
         IdRole,
         ParentIdRole,
         ResolutionRole,
+        IsDirRole,
+        CacheKeyRole
     };
 
 public:

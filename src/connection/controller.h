@@ -25,9 +25,15 @@ public:
 
     Q_INVOKABLE void contentOfPhotoDirectory(int id, FileListModel *file_list_model);
 
+
+public slots:
+    void getThumbnail(const IdType &id, const QString &cacheKey);
+
 signals:
     void loginStarted();
     void loginCompleted();
+
+    void onGetThumbnailFinished(const QString &, const QImage &);
 
 private:
     explicit Controller(QObject *parent = nullptr);

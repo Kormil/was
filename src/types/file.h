@@ -12,10 +12,14 @@ using FilePtr = std::shared_ptr<File>;
 using IdType = int;
 
 class File : public QObject {
+
 public:
     virtual IdType id() const = 0;
     virtual IdType parentId() const = 0;
-    virtual QString name() const= 0;
+    virtual QString name() const = 0;
+
+    virtual bool isDir() const = 0;
+    virtual QString cacheKey() const { return ""; };
 
     virtual void fromJson(QJsonObject& json) = 0;
 };

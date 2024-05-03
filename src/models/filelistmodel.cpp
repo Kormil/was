@@ -36,6 +36,12 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     case FileListRole::ParentIdRole: {
         return QVariant(file->parentId());
     }
+    case FileListRole::IsDirRole: {
+        return QVariant(file->isDir());
+    }
+    case FileListRole::CacheKeyRole: {
+        return QVariant(file->cacheKey());
+    }
     }
 
     return QVariant();
@@ -49,6 +55,8 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     names[FileListRole::NameRole] = "name";
     names[FileListRole::IdRole] = "id";
     names[FileListRole::ParentIdRole] = "parent_id";
+    names[FileListRole::IsDirRole] = "is_dir";
+    names[FileListRole::CacheKeyRole] = "cache_key";
 
     return names;
 }

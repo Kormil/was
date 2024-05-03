@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QNetworkDiskCache>
 #include <QStandardPaths>
+#include <QPixmap>
 
 #include "request.h"
 
@@ -258,4 +259,44 @@ FileListPtr Connection::parseDirectoryItemsAnswer(const QJsonDocument &jsonDocum
     }
 
     return std::move(files);
+}
+
+void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, std::function<void (const QImage&)> handler) {
+    QString size_text;
+
+    switch (size) {
+        case Image::Size::ORIGINAL: size_text = "original"; break;
+        case Image::Size::SM: size_text = "sm"; break;
+        case Image::Size::M: size_text = "m"; break;
+        case Image::Size::XL: size_text = "xl"; break;
+    }
+
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Thumbnail&method=get&version=1&id=%2&cache_key=%3&type=unit&size=%4&_sid=%5").arg(parameters_.quickconnect).arg(id).arg(cacheKey).arg(size_text).arg(parameters_.sid);
+    qDebug() << url;
+    QUrl searchUrl(url);
+
+    Request* requestRaw = request(searchUrl);
+    requestRaw->addHeader("Accept", "application/json");
+    requestRaw->addHeader("Connection", "keep-alive");
+    requestRaw->addHeader("Sec-Fetch-Dest", "document");
+    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
+    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
+
+    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
+    requestRaw->addHeader("Referer", referer.toUtf8());
+
+    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+        QImage pixmap;
+
+        if (status == Request::ERROR) {
+            std::cout << "CONNECTION ERROR" << std::endl;
+            handler(pixmap);
+        } else {
+            pixmap.loadFromData(responseArray);
+            handler(pixmap);
+        }
+
+        deleteRequest(requestRaw->serial());
+    });
+    requestRaw->run();
 }

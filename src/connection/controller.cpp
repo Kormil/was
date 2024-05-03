@@ -35,6 +35,7 @@ void Controller::bindToQml()
     // files
     qRegisterMetaType<FileListModel*>();
     qmlRegisterType<FileListModel>("FileListModel", 1, 0, "FileListModel");
+
     //qmlRegisterType<Dir>("Dir", 1, 0, "Dir");
 }
 
@@ -60,5 +61,11 @@ void Controller::contentOfPhotoDirectory(int id, FileListModel* file_list_model)
 
     files_manager_->get(id, [this, file_list_model](FileListPtr file_list) {
         file_list_model->setList(file_list);
+    });
+}
+
+void Controller::getThumbnail(const IdType &id, const QString &cacheKey) {
+    connection_->getThumbnail(Image::Size::SM, id, cacheKey, [this, cacheKey](const QImage& image) {
+        emit onGetThumbnailFinished(cacheKey, image);
     });
 }

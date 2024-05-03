@@ -1,5 +1,7 @@
 #include "image.h"
 
+#include "src/connection/controller.h"
+
 QString Image::name() const {
     return name_;
 }

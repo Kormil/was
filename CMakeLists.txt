@@ -13,15 +13,27 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(KORPHO_SOURCES
     src/connection/connection.cpp
+    src/connection/connection.h
     src/connection/controller.cpp
+    src/connection/controller.h
     src/connection/request.cpp
+    src/connection/request.h
+    src/connection/asyncimageprovider.h
     src/types/dir.cpp
+    src/types/dir.h
     src/types/image.cpp
+    src/types/image.h
+    src/types/file.h
     src/types/filelist.cpp
+    src/types/filelist.h
     src/types/filesmanager.cpp
+    src/types/filesmanager.h
     src/models/filelistmodel.cpp
+    src/models/filelistmodel.h
     src/settings.cpp
+    src/settings.h
     src/secretsmanager.cpp
+    src/secretsmanager.h
     src/harbour-was.cpp
 )
 

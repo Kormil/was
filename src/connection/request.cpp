@@ -31,9 +31,9 @@ void Request::run()
         responseFinished(networkReply->error(), networkReply->errorString());
     });
 
-    QObject::connect(networkReply, &QNetworkReply::redirected, [this](const QUrl &url) {
-        qDebug() << "REDIRECT: " << url;
-    });
+//    QObject::connect(networkReply, &QNetworkReply::redirected, [this](const QUrl &url) {
+//        qDebug() << "REDIRECT: " << url;
+//    });
 }
 
 void Request::addHeader(const QByteArray &key, const QByteArray &value)
@@ -70,7 +70,6 @@ void Request::responseFinished(QNetworkReply::NetworkError error, QString errorS
     }
 
     responseHeaders = networkReply->rawHeaderPairs();
-    qDebug() << "RedirectionTargetAttribute: " << networkReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     emit finished(SUCCESS, responseArray);
 }
 

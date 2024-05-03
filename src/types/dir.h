@@ -28,9 +28,14 @@ public:
     IdType parentId() const override;
     QString name() const override;
 
+    bool isDir() const override {
+        return true;
+    }
+
 signals:
     void idChanged();
     void nameChanged();
+    void urlChanged();
 
 private:
     IdType id_;
