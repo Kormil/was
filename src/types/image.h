@@ -36,6 +36,7 @@ public:
     IdType parentId() const;
     QString name() const;
     QString cacheKey() const;
+    QString createTime() const;
 
     bool isDir() const override {
         return false;
@@ -51,6 +52,7 @@ private:
     IdType parent_id_;
     QString name_;
     QString cache_key_;
+    QString create_time_;
 };
 
 #endif // IMAGE_H

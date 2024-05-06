@@ -89,6 +89,7 @@ add_custom_target(distfiles
         qml/dialogs/LoginDialog.qml
         qml/dialogs/SaveLoginDataDialog.qml
         qml/dialogs/AutoLoginOnStartDialog.qml
+        qml/items/DictionaryPictureItem.qml
         rpm/harbour-was.changes.in
         rpm/harbour-was.changes.run.in
         rpm/harbour-was.spec

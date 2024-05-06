@@ -20,6 +20,7 @@ public:
 
     virtual bool isDir() const = 0;
     virtual QString cacheKey() const { return ""; };
+    virtual QString createTime() const  { return ""; };
 
     virtual void fromJson(QJsonObject& json) = 0;
 };

@@ -26,7 +26,8 @@ class FileListModel : public QAbstractListModel
         ParentIdRole,
         ResolutionRole,
         IsDirRole,
-        CacheKeyRole
+        CacheKeyRole,
+        CreateTimeRole
     };
 
 public:

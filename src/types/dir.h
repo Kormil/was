@@ -41,6 +41,7 @@ private:
     IdType id_;
     IdType parent_id_;
     QString name_;
+    QString path_;
 };
 
 #endif // Dir_H

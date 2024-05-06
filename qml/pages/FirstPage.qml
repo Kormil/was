@@ -4,8 +4,11 @@ import Sailfish.Silica 1.0
 import FileListModel 1.0
 import Controller 1.0
 
+import "../items"
+
 Page {
     property int download_id: 0;
+    property string dir_name: qsTr("Photos")
 
     id: page
 
@@ -34,56 +37,20 @@ Page {
             }
         }
 
-        //contentHeight: listView.height
-
         SilicaListView {
             id: listView
 
             model: fileListModel
 
             anchors.fill: parent
-            spacing: Theme.paddingMedium
+            spacing: 0
 
             header: PageHeader {
                 id: title
-                title: qsTr("Photos")
+                title: dir_name
             }
 
-            delegate: ListItem {
-                contentHeight: Theme.itemSizeSmall
-
-                Rectangle {
-                    anchors.fill: parent
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.10) }
-                        GradientStop { position: 1.0; color: "transparent" }
-                    }
-                }
-
-                Image {
-                    id: icon
-                    height: parent.height
-                    sourceSize.height: parent.height
-                    fillMode: Image.PreserveAspectFit
-                    source: model.is_dir ? "image://theme/icon-m-folder" : "image://photos/" + model.cache_key
-                    smooth: false
-                    cache: true
-                }
-
-                Label {
-                    id: fileLabel
-                    text: model.name
-                    height: Theme.itemSizeSmall
-                    anchors.centerIn: parent
-                }
-
-                onClicked: {
-                    if (model.is_dir === true) {
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id})
-                    } else {
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {fileImage: model})
-                    }
-                }
+            delegate: DictionaryPictureItem {
             }
 
             VerticalScrollDecorator {}

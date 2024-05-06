@@ -193,7 +193,9 @@ FileListPtr Connection::parseDirectoriesAnswer(const QJsonDocument &jsonDocument
         auto dirJson = result.toObject();
         dir->fromJson(dirJson);
 
-        files->append(dir);
+        if (!dir->name().isEmpty()) {
+            files->append(dir);
+        }
     }
 
     return std::move(files);
@@ -272,7 +274,6 @@ void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, std
     }
 
     QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Thumbnail&method=get&version=1&id=%2&cache_key=%3&type=unit&size=%4&_sid=%5").arg(parameters_.quickconnect).arg(id).arg(cacheKey).arg(size_text).arg(parameters_.sid);
-    qDebug() << url;
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);

@@ -42,6 +42,9 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     case FileListRole::CacheKeyRole: {
         return QVariant(file->cacheKey());
     }
+    case FileListRole::CreateTimeRole: {
+        return QVariant(file->createTime());
+    }
     }
 
     return QVariant();
@@ -57,6 +60,7 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     names[FileListRole::ParentIdRole] = "parent_id";
     names[FileListRole::IsDirRole] = "is_dir";
     names[FileListRole::CacheKeyRole] = "cache_key";
+    names[FileListRole::CreateTimeRole] = "create_time";
 
     return names;
 }
@@ -78,7 +82,7 @@ void FileListModel::setList(FileListPtr files)
     if (files_) {
         connect(files_.get(), &FileList::preItemAppended, this, [this](int size) {
             const int index = files_->size();
-            beginInsertRows(QModelIndex(), index, index + size);
+            beginInsertRows(QModelIndex(), index, index + size - 1);
         });
 
         connect(files_.get(), &FileList::postItemAppended, this, [this]() {

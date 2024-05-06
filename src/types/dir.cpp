@@ -14,6 +14,7 @@ IdType Dir::parentId() const {
 
 void Dir::fromJson(QJsonObject &json) {
     id_ = json["id"].toInt();
-    name_ = json["name"].toString();
+    path_ = json["name"].toString();
+    name_ = path_.section("/", -1, -1);
     parent_id_ = json["parent"].toInt();
 }
