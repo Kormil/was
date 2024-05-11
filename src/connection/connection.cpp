@@ -106,42 +106,11 @@ bool Connection::parseLoginAnswer(const QJsonDocument &jsonDocument) {
     return success;
 }
 
-void Connection::contentOfPhotoDirectory(std::function<void (FileListPtr)> handler) {
-
-    QString parsedParameters;
-
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=1&method=list_parents&_sid=%2").arg(parameters_.quickconnect).arg(parameters_.sid);
-    QUrl searchUrl(url);
-
-    Request* requestRaw = request(searchUrl);
-    requestRaw->addHeader("Accept", "application/json");
-    requestRaw->addHeader("Connection", "keep-alive");
-    requestRaw->addHeader("Sec-Fetch-Dest", "document");
-    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
-    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
-
-    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
-    requestRaw->addHeader("Referer", referer.toUtf8());
-
-    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
-        if (status == Request::ERROR) {
-            std::cout << "CONNECTION ERROR" << std::endl;
-            handler(nullptr);
-        } else {
-            auto response = parseDirectoriesAnswer(QJsonDocument::fromJson(responseArray));
-            handler(response);
-        }
-
-        deleteRequest(requestRaw->serial());
-    });
-    requestRaw->run();
-}
-
 void Connection::contentOfDirectory(IdType id, std::function<void (FileListPtr)> handler) {
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=1&method=list&offset=0&limit=100&id=%2&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=list&offset=0&limit=100&id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -263,7 +232,7 @@ FileListPtr Connection::parseDirectoryItemsAnswer(const QJsonDocument &jsonDocum
     return std::move(files);
 }
 
-void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, std::function<void (const QImage&)> handler) {
+void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, QString type, std::function<void (const QImage&)> handler) {
     QString size_text;
 
     switch (size) {
@@ -273,7 +242,7 @@ void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, std
         case Image::Size::XL: size_text = "xl"; break;
     }
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Thumbnail&method=get&version=1&id=%2&cache_key=%3&type=unit&size=%4&_sid=%5").arg(parameters_.quickconnect).arg(id).arg(cacheKey).arg(size_text).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Thumbnail&method=get&version=2&id=%2&cache_key=%3&type=%4&size=%5&_sid=%6").arg(parameters_.quickconnect).arg(id).arg(cacheKey).arg(type).arg(size_text).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -295,6 +264,84 @@ void Connection::getThumbnail(Image::Size size, IdType id, QString cacheKey, std
         } else {
             pixmap.loadFromData(responseArray);
             handler(pixmap);
+        }
+
+        deleteRequest(requestRaw->serial());
+    });
+    requestRaw->run();
+}
+
+void Connection::countOfDirectoryItems(IdType id, std::function<void (int, int)> handler) {
+
+    QString parsedParameters;
+
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=count&folder_id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QUrl searchUrl(url);
+
+    Request* requestRaw = request(searchUrl);
+    requestRaw->addHeader("Accept", "application/json");
+    requestRaw->addHeader("Connection", "keep-alive");
+    requestRaw->addHeader("Sec-Fetch-Dest", "document");
+    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
+    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
+
+    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
+    requestRaw->addHeader("Referer", referer.toUtf8());
+
+    QObject::connect(requestRaw, &Request::finished, [this, id, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+        if (status == Request::ERROR) {
+            std::cout << "CONNECTION ERROR" << std::endl;
+            handler(0, 0);
+        } else {
+            auto response = parseCountDirectoryItemsAnswer(QJsonDocument::fromJson(responseArray));
+            handler(id, response);
+        }
+
+        deleteRequest(requestRaw->serial());
+    });
+    requestRaw->run();
+}
+
+int Connection::parseCountDirectoryItemsAnswer(const QJsonDocument &jsonDocument) {
+    if (jsonDocument.isNull()) {
+        return 0;
+    }
+
+    const auto& object = jsonDocument.object();
+    const auto& data = object["data"];
+    if (data.isUndefined()) {
+        return 0;
+    }
+
+    const auto count = data.toObject()["count"].toInt();
+    return count;
+}
+
+
+void Connection::countOfDirectory(IdType id, std::function<void (int, int)> handler) {
+
+    QString parsedParameters;
+
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=count&offset=0&id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QUrl searchUrl(url);
+
+    Request* requestRaw = request(searchUrl);
+    requestRaw->addHeader("Accept", "application/json");
+    requestRaw->addHeader("Connection", "keep-alive");
+    requestRaw->addHeader("Sec-Fetch-Dest", "document");
+    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
+    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
+
+    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
+    requestRaw->addHeader("Referer", referer.toUtf8());
+
+    QObject::connect(requestRaw, &Request::finished, [this, id, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+        if (status == Request::ERROR) {
+            std::cout << "CONNECTION ERROR" << std::endl;
+            handler(0, 0);
+        } else {
+            auto response = parseCountDirectoryItemsAnswer(QJsonDocument::fromJson(responseArray));
+            handler(id, response);
         }
 
         deleteRequest(requestRaw->serial());

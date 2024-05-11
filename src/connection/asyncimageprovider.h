@@ -13,18 +13,19 @@ class AsyncImageResponse : public QQuickImageResponse {
     Q_OBJECT
 
 signals:
-    void getThumbnail(int id, const QString &cacheKey);
+    void getThumbnail(int id, const QString &cacheKey, const QString &type);
 
 public:
-    AsyncImageResponse(const QString &cache_key, const QSize &requested_size) :
+    AsyncImageResponse(const QString &cache_key, const QSize &requested_size, const QString &type) :
         cache_key_(cache_key),
-        requested_size_(requested_size)
+        requested_size_(requested_size),
+        type_(type)
     {
         id_ = cache_key.split(u'_', QString::SkipEmptyParts).first();
     }
 
     void start() {
-        emit getThumbnail(id_.toInt(), cache_key_);
+        emit getThumbnail(id_.toInt(), cache_key_, type_);
     }
 
     void onGetThumbnailFinished(const QString &cache_key, const QImage& image) {
@@ -56,6 +57,7 @@ private:
     QString cache_key_;
     QImage image_;
     QSize requested_size_;
+    QString type_;
 };
 
 class AsyncImageProvider : public QQuickAsyncImageProvider
@@ -67,7 +69,30 @@ public:
 
     QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize) override
     {
-        AsyncImageResponse *response = new AsyncImageResponse(id, requestedSize);
+        AsyncImageResponse *response = new AsyncImageResponse(id, requestedSize, "unit");
+
+        QObject::connect(&controller_, &Controller::onGetThumbnailFinished, response, &AsyncImageResponse::onGetThumbnailFinished);
+        QObject::connect(response, &AsyncImageResponse::getThumbnail, &controller_, &Controller::getThumbnail);
+
+        response->start();
+
+        return response;
+    }
+
+private:
+    Controller &controller_;
+};
+
+class AsyncFolderProvider : public QQuickAsyncImageProvider
+{
+public:
+    AsyncFolderProvider(Controller &controller) :
+        controller_(controller)
+    {}
+
+    QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize) override
+    {
+        AsyncImageResponse *response = new AsyncImageResponse(id, requestedSize, "folder");
 
         QObject::connect(&controller_, &Controller::onGetThumbnailFinished, response, &AsyncImageResponse::onGetThumbnailFinished);
         QObject::connect(response, &AsyncImageResponse::getThumbnail, &controller_, &Controller::getThumbnail);

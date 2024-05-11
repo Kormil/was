@@ -44,6 +44,9 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     }
     case FileListRole::CreateTimeRole: {
         return QVariant(file->createTime());
+    }   
+    case FileListRole::ItemCounterRole: {
+        return QVariant(file->count());
     }
     }
 
@@ -61,6 +64,7 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     names[FileListRole::IsDirRole] = "is_dir";
     names[FileListRole::CacheKeyRole] = "cache_key";
     names[FileListRole::CreateTimeRole] = "create_time";
+    names[FileListRole::ItemCounterRole] = "item_counter";
 
     return names;
 }
@@ -87,6 +91,11 @@ void FileListModel::setList(FileListPtr files)
 
         connect(files_.get(), &FileList::postItemAppended, this, [this]() {
             endInsertRows();
+        });
+
+        connect(files_.get(), &FileList::dataChanged, this, [this](int row, int role) {
+            auto index = createIndex(row, 0);
+            emit dataChanged(index, index, {role});
         });
     }
 

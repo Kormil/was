@@ -27,10 +27,14 @@ public:
     IdType id() const override;
     IdType parentId() const override;
     QString name() const override;
+    QString cacheKey() const;
 
     bool isDir() const override {
         return true;
     }
+
+    void setCount(int count) override;
+    int count() const override;
 
 signals:
     void idChanged();
@@ -42,6 +46,10 @@ private:
     IdType parent_id_;
     QString name_;
     QString path_;
+    QString cache_key_;
+    int count_;
+
+    bool has_thumbnail_ = false;
 };
 
 #endif // Dir_H

@@ -27,7 +27,7 @@ public:
 
 
 public slots:
-    void getThumbnail(const IdType &id, const QString &cacheKey);
+    void getThumbnail(const IdType &id, const QString &cacheKey, const QString &type);
 
 signals:
     void loginStarted();

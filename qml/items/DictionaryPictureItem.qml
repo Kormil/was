@@ -12,20 +12,39 @@ ListItem {
         }
     }
 
+    Label {
+        id: item_counter
+        text: model.item_counter
+        height: parent.height / 2.0
+        truncationMode: TruncationMode.Fade
+        visible: model.is_dir
+
+        anchors {
+            right: icon.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: Theme.horizontalPageMargin
+            rightMargin: Theme.horizontalPageMargin
+        }
+
+        horizontalAlignment: Text.AlignHCenters
+        verticalAlignment: Text.AlignVCenter
+        color: Theme.secondaryColor
+    }
+
     Image {
         id: icon
 
-        height: parent.height - Theme.horizontalPageMargin
+        height: parent.height
         width: height
 
-        x: Theme.horizontalPageMargin
+        x: Theme.horizontalPageMargin + width
 
         anchors {
             verticalCenter: parent.verticalCenter
         }
 
         fillMode: Image.PreserveAspectFit
-        source: model.is_dir ? "image://theme/icon-m-file-folder" : "image://photos/" + model.cache_key
+        source: model.cache_key
         smooth: false
         cache: true
     }
@@ -35,6 +54,7 @@ ListItem {
         text: model.name
         height: parent.height / 2.0
         truncationMode: TruncationMode.Fade
+        color: Theme.primaryColor
 
         anchors {
             left: icon.right
@@ -51,6 +71,7 @@ ListItem {
         text: model.create_time
         height: Theme.itemSizeExtraSmall
         font.pixelSize: Theme.fontSizeExtraSmall
+        color: Theme.secondaryColor
 
         anchors {
             left: fileLabel.left

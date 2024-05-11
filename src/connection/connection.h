@@ -35,9 +35,12 @@ public:
     virtual ~Connection() {}
 
     void login(QString quickconnect, QString login, QString password, std::function<void(bool)> handler);
-    void contentOfPhotoDirectory(std::function<void (FileListPtr)> handler);
+
     void contentOfDirectory(IdType id, std::function<void (FileListPtr)> handler);
     void contentOfDirectoryItems(IdType id, std::function<void (FileListPtr)> handler);
+
+    void countOfDirectoryItems(IdType id, std::function<void (int, int)> handler);
+    void countOfDirectory(IdType id, std::function<void (int, int)> handler);
 
     Request* request(const QUrl &requestUrl);
     void deleteRequest(int serial);
@@ -45,7 +48,7 @@ public:
 
     QNetworkAccessManager* networkAccessManager();
 
-    void getThumbnail(Image::Size size, IdType id, QString cacheKey, std::function<void (const QImage &)> handler);
+    void getThumbnail(Image::Size size, IdType id, QString cacheKey, QString type, std::function<void (const QImage &)> handler);
 
 protected:
     int nextSerial();
@@ -54,6 +57,7 @@ private:
     bool parseLoginAnswer(const QJsonDocument &jsonDocument);
     FileListPtr parseDirectoriesAnswer(const QJsonDocument &jsonDocument);
     FileListPtr parseDirectoryItemsAnswer(const QJsonDocument &jsonDocument);
+    int parseCountDirectoryItemsAnswer(const QJsonDocument &jsonDocument);
 
     ConnectionParameters parameters_;
 

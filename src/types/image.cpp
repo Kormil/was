@@ -17,7 +17,7 @@ IdType Image::parentId() const {
 }
 
 QString Image::cacheKey() const {
-    return cache_key_;
+    return "image://photos/" + cache_key_;
 }
 
 QString Image::createTime() const {

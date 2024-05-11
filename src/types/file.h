@@ -22,6 +22,9 @@ public:
     virtual QString cacheKey() const { return ""; };
     virtual QString createTime() const  { return ""; };
 
+    virtual void setCount(int) {};
+    virtual int count() const { return 0; };;
+
     virtual void fromJson(QJsonObject& json) = 0;
 };
 

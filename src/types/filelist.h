@@ -30,9 +30,14 @@ public:
     void append(const FilePtr &file);
     void appendList(const FileListPtr &files);
 
+    std::vector<IdType> getAllIds() const;
+
+    void setData(const IdType id, int role, QVariant value);
+
 signals:
     void preItemAppended(int);
     void postItemAppended();
+    void dataChanged(int, int);
 
 private:
     std::vector<FilePtr> files_;

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "src/models/filelistmodel.h"
+
 FileList::FileList(QObject *parent) : QObject(parent) {
 
 }
@@ -96,4 +98,27 @@ void FileList::appendList(const FileListPtr &files)
     emit postItemAppended();
 
     //files = nullptr;
+}
+
+std::vector<IdType> FileList::getAllIds() const {
+    std::vector<IdType> ids;
+
+    for (const auto& file: files_) {
+        if (file->isDir()) {
+            ids.push_back(file->id());
+        }
+    }
+
+    return ids;
+}
+
+void FileList::setData(const IdType id, int role, QVariant value) {
+    auto file = get(id);
+    auto row = id_to_row_.find(id);
+
+    if (role == FileListModel::FileListRole::ItemCounterRole){
+        file->setCount(value.toInt());
+
+        emit dataChanged(row->second, role);
+    }
 }

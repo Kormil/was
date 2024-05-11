@@ -19,6 +19,7 @@ class FileListModel : public QAbstractListModel
 {
     Q_OBJECT
 
+public:
     enum FileListRole
     {
         NameRole = Qt::UserRole + 1,
@@ -27,10 +28,10 @@ class FileListModel : public QAbstractListModel
         ResolutionRole,
         IsDirRole,
         CacheKeyRole,
-        CreateTimeRole
+        CreateTimeRole,
+        ItemCounterRole
     };
 
-public:
     explicit FileListModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

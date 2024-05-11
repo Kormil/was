@@ -27,7 +27,6 @@ public:
 
 private:
     IdType getNextId();
-    void init(const FileListPtr &files);
     void append(const FileListPtr &files);
 
     std::mutex file_list_iterator_mutex_;
@@ -36,6 +35,7 @@ private:
 
     std::vector<std::pair<IdType, FileListPtr>>::iterator file_lists_iterator_;
     std::vector<std::pair<IdType, FileListPtr>> file_lists_;
+    void getItemsCounter(int id, const FileListPtr &files);
 };
 
 #endif // FILESMANAGER_Hs

@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
     Settings::bindToQml();
 
     view->engine()->addImageProvider("photos", new AsyncImageProvider(controller));
+    view->engine()->addImageProvider("folders", new AsyncFolderProvider(controller));
+
     view->engine()->setNetworkAccessManagerFactory(&factory);
     view->setSource(SailfishApp::pathToMainQml());
     view->show();
