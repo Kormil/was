@@ -4,14 +4,6 @@ import Sailfish.Silica 1.0
 ListItem {
     contentHeight: Theme.itemSizeMedium
 
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.10) }
-            GradientStop { position: 1.0; color: "transparent" }
-        }
-    }
-
     Label {
         id: item_counter
         text: model.item_counter
@@ -86,7 +78,8 @@ ListItem {
         if (model.is_dir === true) {
             pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id, dir_name: model.name})
         } else {
-            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {fileImage: model})
+            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
+
         }
     }
 }

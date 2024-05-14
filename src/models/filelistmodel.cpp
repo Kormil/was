@@ -44,9 +44,12 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     }
     case FileListRole::CreateTimeRole: {
         return QVariant(file->createTime());
-    }   
+    }
     case FileListRole::ItemCounterRole: {
         return QVariant(file->count());
+    }
+    case FileListRole::PhotoSourceRole: {
+        return QVariant(file->photoSource());
     }
     }
 
@@ -65,6 +68,7 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     names[FileListRole::CacheKeyRole] = "cache_key";
     names[FileListRole::CreateTimeRole] = "create_time";
     names[FileListRole::ItemCounterRole] = "item_counter";
+    names[FileListRole::PhotoSourceRole] = "photo_source";
 
     return names;
 }

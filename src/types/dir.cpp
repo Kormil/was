@@ -49,7 +49,7 @@ QString Dir::cacheKey() const {
     }
 
     if (!has_thumbnail_) {
-        return "image://photos/" + cache_key_;
+        return "image://thumbnails/" + cache_key_;
     }
 
     return "image://folders/" + cache_key_;

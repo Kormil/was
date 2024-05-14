@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Icon=was
-Exec=was
+Icon=harbour-was
+Exec=harbour-was
 Name=Was
 # translation example:
 # your app name in German locale (de)
@@ -15,6 +15,6 @@ Name[de]=was
 # Replace with your organization as a reverse domain name
 OrganizationName=org.myorg
 # ApplicationName does not have to be identical to Name
-ApplicationName=was
+ApplicationName=harbour-was
 # Add the required permissions here
-Permissions=
+Permissions=Internet;UserDirs;Secrets

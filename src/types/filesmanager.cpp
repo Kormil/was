@@ -62,17 +62,18 @@ void FilesManager::getItemsCounter(int id, const FileListPtr &files)
 }
 
 void FilesManager::get(IdType id, std::function<void(const FileListPtr &files)> handler) {
-    const auto next_id = getNextId();
-
     std::lock_guard lock{file_list_iterator_mutex_};
+    if (file_lists_iterator_ != file_lists_.end() && id == file_lists_iterator_->first) {
+        return handler(file_lists_iterator_->second);
+    }
 
+    const auto next_id = getNextId();
     if (next_id != InvalidId) {
         ++file_lists_iterator_;
         return handler(top());
     }
 
     file_lists_.erase(file_lists_iterator_, file_lists_.end());
-
 
     connection_->contentOfDirectory(id, [this, id, handler](const FileListPtr &files) {
         append(id, files);
@@ -84,7 +85,6 @@ void FilesManager::get(IdType id, std::function<void(const FileListPtr &files)> 
         append(id, files);
         handler(file_lists_iterator_->second);
     });
-
 }
 
 IdType FilesManager::getNextId() {

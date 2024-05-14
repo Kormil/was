@@ -17,6 +17,10 @@ IdType Image::parentId() const {
 }
 
 QString Image::cacheKey() const {
+    return "image://thumbnails/" + cache_key_;
+}
+
+QString Image::photoSource() const {
     return "image://photos/" + cache_key_;
 }
 

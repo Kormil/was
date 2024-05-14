@@ -10,6 +10,9 @@ Dialog {
 
     Component.onCompleted: {
         Settings.loadPassword()
+
+        quickconnect.text = Settings.quickconnect
+        loginField.text = Settings.userLogin
     }
 
     property FileListModel fileListModel

@@ -42,8 +42,9 @@ void Controller::bindToQml()
 void Controller::login(FileListModel* file_list_model, QString quickconnect, QString login, QString password) {
     emit loginStarted();
 
-    connection_->login(quickconnect, login, password, [this, file_list_model](bool result){
+    connection_->login(quickconnect, login, password, [this, file_list_model](bool result) {
         loginResult = result;
+
         contentOfPhotoDirectory(RootId, file_list_model);
 
         emit loginCompleted();
@@ -63,5 +64,11 @@ void Controller::contentOfPhotoDirectory(int id, FileListModel* file_list_model)
 void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const QString &type) {
     connection_->getThumbnail(Image::Size::SM, id, cacheKey, type, [this, cacheKey](const QImage& image) {
         emit onGetThumbnailFinished(cacheKey, image);
+    });
+}
+
+void Controller::getImage(const IdType &id, const QString &cacheKey, const QString &type) {
+    connection_->getThumbnail(Image::Size::XL, id, cacheKey, type, [this, cacheKey](const QImage& image) {
+        emit onGetImageFinished(cacheKey, image);
     });
 }

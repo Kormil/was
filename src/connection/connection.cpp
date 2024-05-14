@@ -59,7 +59,7 @@ void Connection::login(QString quickconnect, QString login, QString password, st
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&session=FileStation&format=cookie").arg(quickconnect).arg(login).arg(password);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&session=FileStation&format=sid").arg(quickconnect).arg(login).arg(password);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -98,7 +98,7 @@ bool Connection::parseLoginAnswer(const QJsonDocument &jsonDocument) {
         return false;
     }
 
-    const auto data_object = data.toObject();
+    const auto& data_object = data.toObject();
 
     auto success = object["success"].toBool();
     parameters_.sid = data_object["sid"].toString();
@@ -108,9 +108,7 @@ bool Connection::parseLoginAnswer(const QJsonDocument &jsonDocument) {
 
 void Connection::contentOfDirectory(IdType id, std::function<void (FileListPtr)> handler) {
 
-    QString parsedParameters;
-
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=list&offset=0&limit=100&id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=list&offset=0&limit=100&id=%2&additional=[%22thumbnail%22]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -150,7 +148,8 @@ FileListPtr Connection::parseDirectoriesAnswer(const QJsonDocument &jsonDocument
         return files;
     }
 
-    const auto& list = data.toObject()["list"];
+    const auto& data_object = data.toObject();
+    const auto& list = data_object["list"];
     if (list.isUndefined()) {
         return files;
     }
@@ -174,8 +173,10 @@ void Connection::contentOfDirectoryItems(IdType id, std::function<void (FileList
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=0&limit=100&folder_id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=0&limit=100&folder_id=%2&additional=[%22thumbnail%22]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
+
+    qDebug() << url;
 
     Request* requestRaw = request(searchUrl);
     requestRaw->addHeader("Accept", "application/json");
@@ -214,7 +215,8 @@ FileListPtr Connection::parseDirectoryItemsAnswer(const QJsonDocument &jsonDocum
         return files;
     }
 
-    const auto& list = data.toObject()["list"];
+    const auto& data_object = data.toObject();
+    const auto& list = data_object["list"];
     if (list.isUndefined()) {
         return files;
     }
@@ -275,7 +277,7 @@ void Connection::countOfDirectoryItems(IdType id, std::function<void (int, int)>
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=count&folder_id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=count&folder_id=%2&additional=[%22thumbnail%22]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -313,7 +315,8 @@ int Connection::parseCountDirectoryItemsAnswer(const QJsonDocument &jsonDocument
         return 0;
     }
 
-    const auto count = data.toObject()["count"].toInt();
+    const auto& data_object = data.toObject();
+    const auto& count = data_object["count"].toInt();
     return count;
 }
 
@@ -322,7 +325,7 @@ void Connection::countOfDirectory(IdType id, std::function<void (int, int)> hand
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=count&offset=0&id=%2&additional=[\"thumbnail\"]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=count&offset=0&id=%2&additional=[%22thumbnail%22]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);

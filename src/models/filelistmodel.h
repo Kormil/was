@@ -29,7 +29,8 @@ public:
         IsDirRole,
         CacheKeyRole,
         CreateTimeRole,
-        ItemCounterRole
+        ItemCounterRole,
+        PhotoSourceRole
     };
 
     explicit FileListModel(QObject *parent = nullptr);

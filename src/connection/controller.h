@@ -28,12 +28,14 @@ public:
 
 public slots:
     void getThumbnail(const IdType &id, const QString &cacheKey, const QString &type);
+    void getImage(const IdType &id, const QString &cacheKey, const QString &type);
 
 signals:
     void loginStarted();
     void loginCompleted();
 
     void onGetThumbnailFinished(const QString &, const QImage &);
+    void onGetImageFinished(const QString &, const QImage &);
 
 private:
     explicit Controller(QObject *parent = nullptr);

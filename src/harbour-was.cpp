@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
 
     Settings::bindToQml();
 
-    view->engine()->addImageProvider("photos", new AsyncImageProvider(controller));
+    view->engine()->addImageProvider("photos", new AsyncPhotoProvider(controller));
+    view->engine()->addImageProvider("thumbnails", new AsyncThumbnailProvider(controller));
     view->engine()->addImageProvider("folders", new AsyncFolderProvider(controller));
 
     view->engine()->setNetworkAccessManagerFactory(&factory);

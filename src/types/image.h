@@ -36,6 +36,7 @@ public:
     IdType parentId() const;
     QString name() const;
     QString cacheKey() const;
+    QString photoSource() const;
     QString createTime() const;
 
     bool isDir() const override {
