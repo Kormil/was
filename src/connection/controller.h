@@ -10,7 +10,8 @@
 
 #include "src/types/file.h"
 #include "src/types/filesmanager.h"
-#include "src/models/filelistmodel.h"
+
+class FileListModel;
 
 class Controller : public QObject
 {
@@ -20,10 +21,10 @@ public:
     static QObject *instance(QQmlEngine *engine, QJSEngine *scriptEngine);
     static void bindToQml();
 
-    Q_INVOKABLE void login(FileListModel* file_list_model, QString quickconnect, QString login, QString password);
+    Q_INVOKABLE void login(QString quickconnect, QString login, QString password);
     Q_INVOKABLE bool getLoginResult();
 
-    Q_INVOKABLE void contentOfPhotoDirectory(int id, FileListModel *file_list_model);
+    Q_INVOKABLE void contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel *file_list_model);
 
 
 public slots:
@@ -45,7 +46,6 @@ private:
     ConnectionPtr connection_;
 
     FilesManagerPtr files_manager_;
-    FileListModelPtr file_list_model_;
 };
 
 #endif // CONTROLLER_H

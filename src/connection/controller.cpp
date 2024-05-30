@@ -1,7 +1,11 @@
 #include "controller.h"
 #include <QtQml>
 
+#include "src/models/filelistmodel.h"
+#include "src/models/showpicturemodel.h"
+
 Q_DECLARE_METATYPE(FileListModel*)
+Q_DECLARE_METATYPE(ShowPictureModel*)
 
 namespace {
     IdType RootId = 0;
@@ -10,7 +14,6 @@ namespace {
 Controller::Controller(QObject *parent) : QObject(parent) {
     connection_ = std::make_shared<Connection>();
 
-    file_list_model_ = std::make_shared<FileListModel>();
     files_manager_ = std::make_unique<FilesManager>(connection_);
 }
 
@@ -36,16 +39,17 @@ void Controller::bindToQml()
     qRegisterMetaType<FileListModel*>();
     qmlRegisterType<FileListModel>("FileListModel", 1, 0, "FileListModel");
 
+    qRegisterMetaType<ShowPictureModel*>();
+    qmlRegisterType<ShowPictureModel>("ShowPictureModel", 1, 0, "ShowPictureModel");
+
     //qmlRegisterType<Dir>("Dir", 1, 0, "Dir");
 }
 
-void Controller::login(FileListModel* file_list_model, QString quickconnect, QString login, QString password) {
+void Controller::login(QString quickconnect, QString login, QString password) {
     emit loginStarted();
 
-    connection_->login(quickconnect, login, password, [this, file_list_model](bool result) {
+    connection_->login(quickconnect, login, password, [this](bool result) {
         loginResult = result;
-
-        contentOfPhotoDirectory(RootId, file_list_model);
 
         emit loginCompleted();
     });
@@ -55,9 +59,10 @@ bool Controller::getLoginResult() {
     return loginResult;
 }
 
-void Controller::contentOfPhotoDirectory(int id, FileListModel* file_list_model) {
-    files_manager_->get(id, [this, file_list_model](FileListPtr file_list) {
+void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel* file_list_model) {
+    files_manager_->get(id, start_point, [this, file_list_model](const FileListPtr& file_list) {
         file_list_model->setList(file_list);
+        files_manager_->getItemsCounter(file_list);
     });
 }
 

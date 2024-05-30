@@ -16,14 +16,21 @@ using FileListPtr = std::shared_ptr<FileList>;
 class FileList : public QObject {
     Q_OBJECT
 
+    using DataType = std::vector<FilePtr>;
 public:
-    explicit FileList(QObject *parent = nullptr);
+    explicit FileList(QObject *qobject = nullptr);
     virtual ~FileList();
 
     std::size_t size() const;
 
+    IdType id() const;
+    void setId(IdType id);
+
     FilePtr getByIndex(int index);
     FilePtr get(const IdType& id);
+
+    void setParentFile(const FilePtr& parent);
+    const FilePtr& parentFile();
 
     int index(const IdType& id) const;
 
@@ -32,7 +39,14 @@ public:
 
     std::vector<IdType> getAllIds() const;
 
+    unsigned int getAllFilesCounter() const;
+    bool canFetchMore() const;
+
+    QVariant data(const IdType file_id, int role);
     void setData(const IdType id, int role, QVariant value);
+
+    DataType::const_iterator begin() const { return files_.begin(); }
+    DataType::const_iterator end() const { return files_.end(); }
 
 signals:
     void preItemAppended(int);
@@ -40,7 +54,11 @@ signals:
     void dataChanged(int, int);
 
 private:
-    std::vector<FilePtr> files_;
+    unsigned int all_files_counter_ = 0;
+    FilePtr parent_;
+
+    IdType id_ = 0;
+    DataType files_;
     std::map<IdType, int> id_to_row_;
 };
 

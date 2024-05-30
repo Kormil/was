@@ -3,24 +3,24 @@ import Sailfish.Silica 1.0
 import Sailfish.Gallery 1.0
 
 import FileListModel 1.0
+import ShowPictureModel 1.0
 import Controller 1.0
 
 import "../dialogs"
 
 Page {
-    property int download_id: 0;
-    property int started_index: 0;
-
-    FileListModel {
-        id: fileListModel
-    }
+    property int download_id: 0
+    property int started_index: 0
 
     id: page
 
-    Connections {
-        target: page
-        Component.onCompleted: {
-            Controller.contentOfPhotoDirectory(page.download_id, fileListModel)
+    ShowPictureModel {
+        id: fileListModel
+    }
+
+    Component.onCompleted: {
+        if (page.download_id !== 0) {
+            Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
         }
     }
 
@@ -37,9 +37,16 @@ Page {
         color: "black";
     }
 
+    Binding {
+        target: fileListModel;
+        property: "current_index";
+        value: listView.currentIndex
+    }
+
     SilicaListView {
         id: listView
         model: fileListModel
+
 
         clip: true
         snapMode: ListView.SnapOneItem
@@ -48,6 +55,7 @@ Page {
         cacheBuffer: width
 
         currentIndex: started_index
+
         anchors.fill: parent
 
         delegate: Item {

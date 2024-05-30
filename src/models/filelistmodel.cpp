@@ -1,10 +1,12 @@
 #include "filelistmodel.h"
 
+#include "src/connection/controller.h"
+
 FileListModel::FileListModel(QObject *parent)
     : QAbstractListModel(parent),
       files_(nullptr)
 {
-
+    auto& controller = Controller::instance();
 }
 
 int FileListModel::rowCount(const QModelIndex &parent) const
@@ -73,7 +75,7 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     return names;
 }
 
-void FileListModel::setList(FileListPtr files)
+void FileListModel::setList(const FileListPtr &files)
 {
     if (files == files_) {
         return;
@@ -85,7 +87,7 @@ void FileListModel::setList(FileListPtr files)
         files_->disconnect(this);
     }
 
-    files_ = std::move(files);
+    files_ = files;
 
     if (files_) {
         connect(files_.get(), &FileList::preItemAppended, this, [this](int size) {
@@ -105,4 +107,25 @@ void FileListModel::setList(FileListPtr files)
 
     endResetModel();
     emit filesLoaded();
+}
+
+bool FileListModel::canFetchMore(const QModelIndex &parent) const
+{
+    if (parent.isValid() || !files_) {
+        return false;
+    }
+
+    return files_->canFetchMore();
+}
+
+void FileListModel::fetchMore(const QModelIndex &parent)
+{
+    if (parent.isValid() || !files_) {
+        return;
+    }
+
+    const int start_point = files_->size();
+
+    auto& controller = Controller::instance();
+    controller.contentOfPhotoDirectory(files_->id(), start_point, this);
 }

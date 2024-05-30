@@ -30,6 +30,8 @@ set(KORPHO_SOURCES
     src/types/filesmanager.h
     src/models/filelistmodel.cpp
     src/models/filelistmodel.h
+    src/models/showpicturemodel.cpp
+    src/models/showpicturemodel.h
     src/settings.cpp
     src/settings.h
     src/secretsmanager.cpp

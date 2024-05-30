@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "src/models/filelistmodel.h"
+
 namespace {
 IdType InvalidId = -1;
 IdType RootId = 0;
@@ -16,16 +18,6 @@ std::size_t FilesManager::size() const {
     return file_lists_.size();
 }
 
-FileListPtr FilesManager::top() {
-    std::lock_guard lock{file_list_iterator_mutex_};
-
-    if (file_lists_iterator_ == file_lists_.begin()) {
-        return nullptr;
-    }
-
-    return file_lists_iterator_->second;
-}
-
 void FilesManager::pop() {
     std::lock_guard lock{file_list_iterator_mutex_};
 
@@ -36,83 +28,113 @@ void FilesManager::pop() {
     --file_lists_iterator_;
 }
 
-void FilesManager::getItemsCounter(int id, const FileListPtr &files)
-{
-    auto handler = [this, id](int subdir_id, int count) {
-        if (!count ) {
+void FilesManager::getItemsCounter(const FileListPtr &files) {
+    auto handler = [files](int subdir_id, int count) {
+        qDebug() << files->id() << " : " << count;
+
+        if (!count) {
             return;
         }
 
-        for (const auto& id_files_pair: file_lists_) {
-            if (id_files_pair.first == id) {
-                auto& files = id_files_pair.second;
-                auto file = files->get(subdir_id);
-
-                count += file->count();
-                files->setData(subdir_id, FileListModel::FileListRole::ItemCounterRole, count);
-            }
+        // for a parent
+        if (subdir_id == files->id() && files->parentFile()) {
+            files->parentFile()->setCount(count);
+            return;
         }
+
+
+        // for rest of files
+        auto current_count = files->data(subdir_id, FileListModel::FileListRole::ItemCounterRole).toInt();
+        files->setData(subdir_id, FileListModel::FileListRole::ItemCounterRole, count + current_count);
     };
 
-    const auto& subdir_ids = files->getAllIds();
-    for (const auto& subdir_id: subdir_ids) {
-        connection_->countOfDirectoryItems(subdir_id, handler);
-        connection_->countOfDirectory(subdir_id, handler);
+    for (const auto& file: *files) {
+        if (file->isDir()) {
+            connection_->countOfDirectoryItems(file->id(), handler);
+            connection_->countOfDirectory(file->id(), handler);
+        }
     }
+
+    // for main dir
+    connection_->countOfDirectoryItems(files->id(), handler);
+    connection_->countOfDirectory(files->id(), handler);
 }
 
-void FilesManager::get(IdType id, std::function<void(const FileListPtr &files)> handler) {
+void FilesManager::get(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler) {
     std::lock_guard lock{file_list_iterator_mutex_};
     if (file_lists_iterator_ != file_lists_.end() && id == file_lists_iterator_->first) {
-        return handler(file_lists_iterator_->second);
+        auto& file_list = file_lists_iterator_->second;
+
+        qDebug() << start_point << " >= " << file_list->size();
+        if (file_list->canFetchMore() && start_point >= file_list->size()) {
+            return fetchMoreItems(id, start_point, handler);
+        } else {
+            return handler(file_list);
+        }
     }
 
-    const auto next_id = getNextId();
-    if (next_id != InvalidId) {
-        ++file_lists_iterator_;
-        return handler(top());
+//    const auto next_id = getNextId();
+//    if (next_id != InvalidId) {
+//        ++file_lists_iterator_;
+//        return handler(top());
+//    }
+
+    if (file_lists_iterator_ != file_lists_.end()) {
+        file_lists_iterator_ = file_lists_.erase((file_lists_iterator_ + 1), file_lists_.end());
+        --file_lists_iterator_;
     }
 
-    file_lists_.erase(file_lists_iterator_, file_lists_.end());
+    connection_->contentOfDirectory(id, [this, id, start_point, handler](const FileListPtr &files) {
+        append(files);
 
-    connection_->contentOfDirectory(id, [this, id, handler](const FileListPtr &files) {
-        append(id, files);
-        getItemsCounter(id, files);
         handler(file_lists_iterator_->second);
+        //fetchMoreItems(id, start_point, handler);
     });
 
-    connection_->contentOfDirectoryItems(id, [this, id, handler](const FileListPtr &files) {
-        append(id, files);
+}
+
+void FilesManager::fetchMoreItems(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler) {
+    connection_->contentOfDirectoryItems(id, start_point, [this, handler](const FileListPtr &files) {
+        append(files);
         handler(file_lists_iterator_->second);
     });
 }
 
-IdType FilesManager::getNextId() {
-    if (file_lists_.size() == 0) {
-        return InvalidId;
+FilePtr FilesManager::getFile(IdType file_id) {
+    if (!file_id) {
+        return nullptr;
     }
 
-    const auto next_ = file_lists_iterator_ + 1;
-
-    if (next_ == file_lists_.end()) {
-        return InvalidId;
+    for (auto& file_list: file_lists_) {
+        for (const auto &file: *file_list.second) {
+            if (file->id() == file_id) {
+                return file;
+            }
+        }
     }
 
-    return next_->first;
+    return nullptr;
 }
 
-void FilesManager::append(IdType id, const FileListPtr &files) {
+void FilesManager::append(const FileListPtr &files) {
     std::lock_guard lock{file_list_iterator_mutex_};
+    const auto id = files->id();
 
     // got something already
     if (file_lists_iterator_ != file_lists_.end()) {
+        // Przy pobiernaiu zdjeć to files->id() jest 0 ponieważ nie ma parenta
         if (file_lists_iterator_->first == id) {
+
+            qDebug() << "DUPA22232: " << file_lists_iterator_->second->id();
             file_lists_iterator_->second->appendList(files);
             return;
         }
     }
 
     // new items
+    const auto &parent = getFile(id);
+    files->setParentFile(parent);
+
     file_lists_.push_back({id, files});
 
     // set iterator on last element :(

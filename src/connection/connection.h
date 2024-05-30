@@ -17,7 +17,7 @@
 #include "src/types/file.h"
 #include "src/types/dir.h"
 #include "src/types/image.h"
-#include "src/models/filelistmodel.h"
+#include "src/types/filelist.h"
 
 class Connection
 {
@@ -37,10 +37,10 @@ public:
     void login(QString quickconnect, QString login, QString password, std::function<void(bool)> handler);
 
     void contentOfDirectory(IdType id, std::function<void (FileListPtr)> handler);
-    void contentOfDirectoryItems(IdType id, std::function<void (FileListPtr)> handler);
+    void contentOfDirectoryItems(IdType id, unsigned int start_point, std::function<void (FileListPtr)> handler);
 
-    void countOfDirectoryItems(IdType id, std::function<void (int, int)> handler);
     void countOfDirectory(IdType id, std::function<void (int, int)> handler);
+    void countOfDirectoryItems(IdType id, std::function<void (int, int)> handler);
 
     Request* request(const QUrl &requestUrl);
     void deleteRequest(int serial);

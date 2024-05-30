@@ -73,13 +73,4 @@ ListItem {
         horizontalAlignment: Text.AlignBottom
         verticalAlignment: Text.AlignBottom
     }
-
-    onClicked: {
-        if (model.is_dir === true) {
-            pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id, dir_name: model.name})
-        } else {
-            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
-
-        }
-    }
 }

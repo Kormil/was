@@ -4,12 +4,21 @@
 
 #include "src/models/filelistmodel.h"
 
-FileList::FileList(QObject *parent) : QObject(parent) {
+FileList::FileList(QObject *qboject) :
+    QObject(qboject)
+{
 
 }
 
-
 FileList::~FileList() {
+}
+
+IdType FileList::id() const {
+    return id_;
+}
+
+void FileList::setId(IdType id) {
+    id_ = id;
 }
 
 std::size_t FileList::size() const
@@ -96,8 +105,6 @@ void FileList::appendList(const FileListPtr &files)
     }
 
     emit postItemAppended();
-
-    //files = nullptr;
 }
 
 std::vector<IdType> FileList::getAllIds() const {
@@ -112,13 +119,65 @@ std::vector<IdType> FileList::getAllIds() const {
     return ids;
 }
 
-void FileList::setData(const IdType id, int role, QVariant value) {
-    auto file = get(id);
-    auto row = id_to_row_.find(id);
+QVariant FileList::data(const IdType file_id, int role) {
+    const auto& file = get(file_id);
 
-    if (role == FileListModel::FileListRole::ItemCounterRole){
+    if (!file) {
+        return 0;
+    }
+
+    if (role == FileListModel::FileListRole::ItemCounterRole) {
+        return file->count();
+    }
+
+    return {};
+}
+
+void FileList::setData(const IdType file_id, int role, QVariant value) {
+    bool visible_data_changed = false;
+
+    const auto& row = id_to_row_.find(file_id);
+    if (row == id_to_row_.end()) {
+        return;
+    }
+
+    const auto &file = files_[row->second];
+
+    if (!file) {
+        return ;
+    }
+
+    if (role == FileListModel::FileListRole::ItemCounterRole) {
         file->setCount(value.toInt());
 
+        visible_data_changed = true;
+    }
+
+    if (visible_data_changed) {
         emit dataChanged(row->second, role);
     }
+}
+
+unsigned int FileList::getAllFilesCounter() const {
+    if (parent_) {
+        return parent_->count();
+    }
+
+    return 0;
+}
+s
+bool FileList::canFetchMore() const {
+    return size() < getAllFilesCounter();
+}
+
+void FileList::setParentFile(const FilePtr& parent) {
+    parent_ = parent;
+
+    if (parent_) {
+        id_ = parent_->id();
+    }
+}
+
+const FilePtr& FileList::parentFile() {
+    return parent_;
 }

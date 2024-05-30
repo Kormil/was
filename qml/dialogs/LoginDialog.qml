@@ -28,7 +28,7 @@ Dialog {
         Settings.userLogin = loginField.text
         Settings.password = passwordField.text
 
-        Controller.login(fileListModel, quickconnect.text, loginField.text, passwordField.text)
+        Controller.login(quickconnect.text, loginField.text, passwordField.text)
     }
 
     SilicaListView {

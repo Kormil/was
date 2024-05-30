@@ -18,16 +18,16 @@ public:
 
     std::size_t size() const;
 
-    FileListPtr top();
     void pop();
 
-    void get(IdType id, std::function<void(const FileListPtr &files)> handler);
+    void get(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler);
+    FilePtr getFile(IdType file_id);
 
-    void append(IdType id, const FileListPtr &files);
+    void getItemsCounter(const FileListPtr &files);
 
 private:
-    IdType getNextId();
     void append(const FileListPtr &files);
+    void fetchMoreItems(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler);
 
     std::mutex file_list_iterator_mutex_;
 
@@ -35,7 +35,7 @@ private:
 
     std::vector<std::pair<IdType, FileListPtr>>::iterator file_lists_iterator_;
     std::vector<std::pair<IdType, FileListPtr>> file_lists_;
-    void getItemsCounter(int id, const FileListPtr &files);
+
 };
 
 #endif // FILESMANAGER_Hs

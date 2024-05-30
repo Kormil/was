@@ -16,9 +16,16 @@ Page {
         id: fileListModel
     }
 
+    Connections {
+        target: Controller
+        onLoginCompleted: {
+            Controller.contentOfPhotoDirectory(0, 0, fileListModel)
+        }
+    }
+
     Component.onCompleted: {
         if (page.download_id !== 0) {
-            Controller.contentOfPhotoDirectory(page.download_id, fileListModel)
+            Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
         }
     }
 
@@ -51,6 +58,13 @@ Page {
             }
 
             delegate: DictionaryPictureItem {
+                onClicked: {
+                    if (model.is_dir === true) {
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id, dir_name: model.name})
+                    } else {
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
+                    }
+                }
             }
 
             VerticalScrollDecorator {}

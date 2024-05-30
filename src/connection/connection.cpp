@@ -121,12 +121,14 @@ void Connection::contentOfDirectory(IdType id, std::function<void (FileListPtr)>
     auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
     requestRaw->addHeader("Referer", referer.toUtf8());
 
-    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+    QObject::connect(requestRaw, &Request::finished, [this, id, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {
             std::cout << "CONNECTION ERROR" << std::endl;
             handler(nullptr);
         } else {
             auto response = parseDirectoriesAnswer(QJsonDocument::fromJson(responseArray));
+            response->setId(id);
+
             handler(response);
         }
 
@@ -169,11 +171,11 @@ FileListPtr Connection::parseDirectoriesAnswer(const QJsonDocument &jsonDocument
     return std::move(files);
 }
 
-void Connection::contentOfDirectoryItems(IdType id, std::function<void (FileListPtr)> handler) {
+void Connection::contentOfDirectoryItems(IdType id, unsigned int start_point, std::function<void (FileListPtr)> handler) {
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=0&limit=100&folder_id=%2&additional=[%22thumbnail%22]&_sid=%3").arg(parameters_.quickconnect).arg(id).arg(parameters_.sid);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=%2&limit=100&folder_id=%3&additional=[%22thumbnail%22]&_sid=%4").arg(parameters_.quickconnect).arg(start_point).arg(id).arg(parameters_.sid);
     QUrl searchUrl(url);
 
     qDebug() << url;
@@ -188,12 +190,14 @@ void Connection::contentOfDirectoryItems(IdType id, std::function<void (FileList
     auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
     requestRaw->addHeader("Referer", referer.toUtf8());
 
-    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+    QObject::connect(requestRaw, &Request::finished, [this, id, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {
             std::cout << "CONNECTION ERROR" << std::endl;
             handler(nullptr);
         } else {
             auto response = parseDirectoryItemsAnswer(QJsonDocument::fromJson(responseArray));
+            response->setId(id);
+
             handler(response);
         }
 

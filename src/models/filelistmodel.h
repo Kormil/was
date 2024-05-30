@@ -39,7 +39,11 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setList(FileListPtr files);
+    void setList(const FileListPtr &files);
+
+protected:
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
 
 signals:
     void filesLoaded();
