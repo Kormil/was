@@ -59,7 +59,7 @@ void Connection::login(QString quickconnect, QString login, QString password, st
 
     QString parsedParameters;
 
-    QString url = QString("https://%1.fr.quickconnect.to/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&session=FileStation&format=sid").arg(quickconnect).arg(login).arg(password);
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&format=sid").arg(quickconnect).arg(login).arg(password);
     QUrl searchUrl(url);
 
     Request* requestRaw = request(searchUrl);
@@ -85,6 +85,31 @@ void Connection::login(QString quickconnect, QString login, QString password, st
 
         deleteRequest(requestRaw->serial());
     });
+    requestRaw->run();
+}
+
+void Connection::logout(std::function<void ()> handler) {
+
+    QString parsedParameters;
+
+    QString url = QString("https://%1.fr.quickconnect.to/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=logout").arg(parameters_.quickconnect);
+    QUrl searchUrl(url);
+
+    Request* requestRaw = request(searchUrl);
+    requestRaw->addHeader("Accept", "application/json");
+    requestRaw->addHeader("Connection", "keep-alive");
+    requestRaw->addHeader("Sec-Fetch-Dest", "document");
+    requestRaw->addHeader("Sec-Fetch-Mode", "navigate");
+    requestRaw->addHeader("Sec-Fetch-Site", "same-site");
+
+    auto referer = QString("https://%1.quickconnect.to").arg(parameters_.quickconnect);
+    requestRaw->addHeader("Referer", referer.toUtf8());
+
+    QObject::connect(requestRaw, &Request::finished, [this, requestRaw, handler](Request::Status status, const QByteArray& responseArray) {
+        handler();
+        deleteRequest(requestRaw->serial());
+    });
+
     requestRaw->run();
 }
 

@@ -51,6 +51,7 @@ void Controller::login(QString quickconnect, QString login, QString password) {
     connection_->login(quickconnect, login, password, [this](bool result) {
         loginResult = result;
 
+        emit loginStatusChanged();
         emit loginCompleted();
     });
 }
@@ -79,5 +80,13 @@ void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const Q
 void Controller::getImage(const IdType &id, const QString &cacheKey, const QString &type) {
     connection_->getThumbnail(Image::Size::XL, id, cacheKey, type, [this, cacheKey](const QImage& image) {
         emit onGetImageFinished(cacheKey, image);
+    });
+}
+
+void Controller::logout() {
+    connection_->logout([this]() {
+        loginResult = false;
+
+        emit loginStatusChanged();
     });
 }

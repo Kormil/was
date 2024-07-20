@@ -16,12 +16,16 @@ class FileListModel;
 class Controller : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(bool logged READ getLoginResult NOTIFY loginStatusChanged)
+
 public:
     static Controller& instance();
     static QObject *instance(QQmlEngine *engine, QJSEngine *scriptEngine);
     static void bindToQml();
 
     Q_INVOKABLE void login(QString quickconnect, QString login, QString password);
+    Q_INVOKABLE void logout();
     Q_INVOKABLE bool getLoginResult();
 
     Q_INVOKABLE void contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel *file_list_model);
@@ -34,6 +38,7 @@ public slots:
 signals:
     void loginStarted();
     void loginCompleted();
+    void loginStatusChanged();
 
     void photosLoading();
     void photosLoaded();

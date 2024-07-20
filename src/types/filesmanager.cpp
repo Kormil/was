@@ -122,10 +122,7 @@ void FilesManager::append(const FileListPtr &files) {
 
     // got something already
     if (file_lists_iterator_ != file_lists_.end()) {
-        // Przy pobiernaiu zdjeć to files->id() jest 0 ponieważ nie ma parenta
         if (file_lists_iterator_->first == id) {
-
-            qDebug() << "DUPA22232: " << file_lists_iterator_->second->id();
             file_lists_iterator_->second->appendList(files);
             return;
         }

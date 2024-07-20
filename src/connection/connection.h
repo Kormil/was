@@ -35,6 +35,7 @@ public:
     virtual ~Connection() {}
 
     void login(QString quickconnect, QString login, QString password, std::function<void(bool)> handler);
+    void logout(std::function<void ()> handler);
 
     void contentOfDirectory(IdType id, std::function<void (FileListPtr)> handler);
     void contentOfDirectoryItems(IdType id, unsigned int start_point, std::function<void (FileListPtr)> handler);

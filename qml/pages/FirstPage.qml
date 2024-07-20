@@ -69,9 +69,20 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
+            visible: download_id === 0
+
             MenuItem {
+                visible: !Controller.logged
+
                 text: qsTr("Login")
                 onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {fileListModel: fileListModel})
+            }
+
+            MenuItem {
+                visible: Controller.logged
+
+                text: qsTr("Logout")
+                onClicked: Controller.logout()
             }
         }
 
@@ -90,6 +101,10 @@ Page {
 
             delegate: DictionaryPictureItem {
                 onClicked: {
+                    if (!Controller.logged) {
+                        pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {fileListModel: fileListModel})
+                    }
+
                     if (model.is_dir === true) {
                         pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id, dir_name: model.name})
                     } else {
