@@ -35,6 +35,9 @@ signals:
     void loginStarted();
     void loginCompleted();
 
+    void photosLoading();
+    void photosLoaded();
+
     void onGetThumbnailFinished(const QString &, const QImage &);
     void onGetImageFinished(const QString &, const QImage &);
 

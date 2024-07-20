@@ -23,7 +23,7 @@ ListItem {
         color: Theme.secondaryColor
     }
 
-    Image {
+    Item {
         id: icon
 
         height: parent.height
@@ -31,14 +31,40 @@ ListItem {
 
         x: Theme.horizontalPageMargin + width
 
-        anchors {
-            verticalCenter: parent.verticalCenter
+        Image {
+
+            height: parent.height
+            width: parent.width
+
+            anchors {
+                verticalCenter: parent.verticalCenter
+            }
+
+            fillMode: Image.PreserveAspectFit
+            source: model.cache_key
+            smooth: false
+            cache: true
+
+            onStatusChanged: {
+                if (status == Image.Ready) {
+                    loadingImageIndicator.running = false
+                    loadingImageIndicator.visible = false
+                } else if (status == Image.Loading) {
+                    loadingImageIndicator.running = true
+                    loadingImageIndicator.visible = true
+                }
+            }
+        }
+        BusyIndicator {
+            id: loadingImageIndicator
+            anchors.centerIn: parent
+            running: true
+            size: BusyIndicatorSize.Small
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: false
         }
 
-        fillMode: Image.PreserveAspectFit
-        source: model.cache_key
-        smooth: false
-        cache: true
     }
 
     Label {

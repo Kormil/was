@@ -68,15 +68,6 @@ Dialog {
                 echoMode: TextInput.Password
                 text: Settings.password
             }
-
-//            Button {
-//                anchors.horizontalCenter: parent.horizontalCenter
-//                text: "Login"
-//                onClicked: {
-//                    console.debug(Settings.password)
-//                   // Controller.login(quickconnect.text, loginField.text, passwordField.text)
-//                }
-//            }
         }
 
         VerticalScrollDecorator {}

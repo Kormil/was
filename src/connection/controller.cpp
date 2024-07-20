@@ -60,9 +60,13 @@ bool Controller::getLoginResult() {
 }
 
 void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel* file_list_model) {
+    emit photosLoading();
+
     files_manager_->get(id, start_point, [this, file_list_model](const FileListPtr& file_list) {
         file_list_model->setList(file_list);
         files_manager_->getItemsCounter(file_list);
+
+        emit photosLoaded();
     });
 }
 

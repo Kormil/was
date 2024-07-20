@@ -19,7 +19,38 @@ Page {
     Connections {
         target: Controller
         onLoginCompleted: {
+            loadingIndicator.running = false
+            loadingIndicator.visible = false
+            loginLabel.visible = false
+
             Controller.contentOfPhotoDirectory(0, 0, fileListModel)
+        }
+    }
+
+    Connections {
+        target: Controller
+        onLoginStarted: {
+            loadingIndicator.running = true
+            loadingIndicator.visible = true
+            loginLabel.visible = true
+        }
+    }
+
+    Connections {
+        target: Controller
+        onPhotosLoading: {
+            loadingIndicator.running = true
+            loadingIndicator.visible = true
+            loginLabel.visible = false
+        }
+    }
+
+    Connections {
+        target: Controller
+        onPhotosLoaded: {
+            loadingIndicator.running = false
+            loadingIndicator.visible = false
+            loginLabel.visible = false
         }
     }
 
@@ -68,6 +99,23 @@ Page {
             }
 
             VerticalScrollDecorator {}
+        }
+
+        BusyIndicator {
+            id: loadingIndicator
+            anchors.centerIn: parent
+            running: true
+            size: BusyIndicatorSize.Large
+            visible: false
+        }
+
+        Label {
+            id: loginLabel
+            text: qsTr("Logging in")
+            anchors.top: loadingIndicator.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: false
+            color: Theme.highlightColor
         }
     }
 }

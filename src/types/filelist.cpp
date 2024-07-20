@@ -165,7 +165,7 @@ unsigned int FileList::getAllFilesCounter() const {
 
     return 0;
 }
-s
+
 bool FileList::canFetchMore() const {
     return size() < getAllFilesCounter();
 }
