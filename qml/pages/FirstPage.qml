@@ -9,7 +9,6 @@ import "../items"
 
 Page {
     property bool logging: false;
-    property int download_id: 0;
     property string dir_name: qsTr("Photos")
 
     id: page
@@ -68,13 +67,8 @@ Page {
     Connections {
         target: Settings
         onInitialized: {
-            if (page.download_id !== 0) {
-                Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
-            } else {
-                if (Settings.autologin) {
-                    console.debug("loadPassword")
-                    Settings.loadPassword()
-                }
+            if (Settings.autologin) {
+                Settings.loadPassword()
             }
         }
     }
@@ -88,7 +82,7 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
-            visible: download_id === 0 && logging === false
+            visible: logging === false
 
             MenuItem {
                 visible: !Controller.logged
@@ -125,7 +119,7 @@ Page {
                     }
 
                     if (model.is_dir === true) {
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/FirstPage.qml"), {download_id: model.id, dir_name: model.name})
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
                     } else {
                         pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
                     }

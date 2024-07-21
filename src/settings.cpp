@@ -7,7 +7,7 @@
 #define LOGIN_AUTOLOGIN_SETTINGS_PATH QStringLiteral("login/autologin")
 #define LOGIN_QUICKCONNECT_SETTINGS_PATH QStringLiteral("login/quickconnect")
 #define LOGIN_USERLOGIN_SETTINGS_PATH QStringLiteral("login/userlogin")
-#define LOGIN_PASSWORD_SETTINGS_PATH QStringLiteral("test7_login/test7_password")
+#define LOGIN_PASSWORD_SETTINGS_PATH QStringLiteral("login/password")
 
 Settings::Settings(QObject *parent) {
     const QString settingsPath =
