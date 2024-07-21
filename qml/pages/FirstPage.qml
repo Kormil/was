@@ -1,12 +1,14 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import Settings 1.0
 import FileListModel 1.0
 import Controller 1.0
 
 import "../items"
 
 Page {
+    property bool logging: false;
     property int download_id: 0;
     property string dir_name: qsTr("Photos")
 
@@ -22,6 +24,7 @@ Page {
             loadingIndicator.running = false
             loadingIndicator.visible = false
             loginLabel.visible = false
+            logging = false
 
             Controller.contentOfPhotoDirectory(0, 0, fileListModel)
         }
@@ -33,6 +36,7 @@ Page {
             loadingIndicator.running = true
             loadingIndicator.visible = true
             loginLabel.visible = true
+            logging = true
         }
     }
 
@@ -54,9 +58,24 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        if (page.download_id !== 0) {
-            Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
+    Connections {
+        target: Settings
+        onPasswordReaded: {
+            Controller.login(Settings.quickconnect, Settings.userLogin, Settings.password)
+        }
+    }
+
+    Connections {
+        target: Settings
+        onInitialized: {
+            if (page.download_id !== 0) {
+                Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
+            } else {
+                if (Settings.autologin) {
+                    console.debug("loadPassword")
+                    Settings.loadPassword()
+                }
+            }
         }
     }
 
@@ -69,7 +88,7 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
-            visible: download_id === 0
+            visible: download_id === 0 && logging === false
 
             MenuItem {
                 visible: !Controller.logged

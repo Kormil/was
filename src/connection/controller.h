@@ -24,7 +24,7 @@ public:
     static QObject *instance(QQmlEngine *engine, QJSEngine *scriptEngine);
     static void bindToQml();
 
-    Q_INVOKABLE void login(QString quickconnect, QString login, QString password);
+    Q_INVOKABLE void login(const QString &quickconnect, const QString &login, const QString &password);
     Q_INVOKABLE void logout();
     Q_INVOKABLE bool getLoginResult();
 

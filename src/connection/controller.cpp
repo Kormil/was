@@ -45,7 +45,7 @@ void Controller::bindToQml()
     //qmlRegisterType<Dir>("Dir", 1, 0, "Dir");
 }
 
-void Controller::login(QString quickconnect, QString login, QString password) {
+void Controller::login(const QString &quickconnect, const QString &login, const QString &password) {
     emit loginStarted();
 
     connection_->login(quickconnect, login, password, [this](bool result) {

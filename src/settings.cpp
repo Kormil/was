@@ -74,6 +74,7 @@ void Settings::loadPassword() {
 void Settings::setPassword(const QString& value) {
     if (user_password_ != value) {
         user_password_ = value;
+
         emit passwordReaded();
     }
 }
