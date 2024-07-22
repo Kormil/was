@@ -16,6 +16,20 @@ set(KORPHO_SOURCES
     src/connection/connection.h
     src/connection/controller.cpp
     src/connection/controller.h
+    src/connection/requests/loginrequest.cpp
+    src/connection/requests/loginrequest.h
+    src/connection/requests/logoutrequest.cpp
+    src/connection/requests/logoutrequest.h
+    src/connection/requests/getfoldersrequest.cpp
+    src/connection/requests/getfoldersrequest.h
+    src/connection/requests/getitemsrequest.cpp
+    src/connection/requests/getitemsrequest.h
+    src/connection/requests/countfoldersrequest.cpp
+    src/connection/requests/countfoldersrequest.h
+    src/connection/requests/countitemsrequest.cpp
+    src/connection/requests/countitemsrequest.h
+    src/connection/requests/getthumbnailrequest.cpp
+    src/connection/requests/getthumbnailrequest.h
     src/connection/request.cpp
     src/connection/request.h
     src/connection/asyncimageprovider.h

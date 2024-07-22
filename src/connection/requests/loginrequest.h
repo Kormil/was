@@ -1,65 +1,17 @@
-﻿#ifndef REQUEST_H
-#define REQUEST_H
+﻿#ifndef LOGINREQUEST_H
+#define LOGINREQUEST_H
 
-#include <memory>
+#include <functional>
 
-#include <QObject>
-#include <QTimer>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include "src/connection/request.h"
 
-class Connection;
-
-template <class RequestType>
-class Request : public QObject
-{
-    using RequestTypePtr = std::unique_ptr<RequestType>;
-
-    Q_OBJECT
+class LoginRequest : public Request {
 public:
-    enum Status
-    {
-        SUCCESS,
-        ERROR
-    };
+    using HandlerType = std::function<void (bool, const QString& sid)>;
 
-    Request(const QUrl& url, Connection *connection);
-    void run();
-
-    void addHeader(const QByteArray& key, const QByteArray& value);
-    QList<QPair<QByteArray, QByteArray> > &getResponseHeaders();
-
-    ~Request() {
-        networkReply->deleteLater();
-    }
-
-    int serial() const;
-    void setSerial(int serial);
-
-    void close();
-
-private slots:
-    void timeout();
-    void responseFinished(QNetworkReply::NetworkError error, QString errorString);
-
-private:
-    QNetworkRequest network_request_;
-    QTimer request_timer_;
-    Connection *connection_;
-    QNetworkReply* network_reply_;
-    QByteArray response_array_;
-    QList<QPair<QByteArray, QByteArray>> response_headers_;
-    int serial_;
-
-    std::function<RequestType(const QJsonDocument &jsonDocument)> parser_;
-    std::function<void(RequestTypePtr)> handler_;
-
-signals:
-    void finished(Status, const QByteArray&);
+    LoginRequest(const QString &quickconnect, const QString &login, const QString &password, HandlerType handler);
+    std::pair<bool, QString> parseAnswer(const QJsonDocument &jsonDocument);
 };
 
-using PatameterList = std::map<QString, QString>;
-using RequestPtr = std::unique_ptr<Request>; 
 
-#endif //REQUEST_H
+#endif //LOGINREQUEST_H

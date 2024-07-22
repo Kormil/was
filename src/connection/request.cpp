@@ -5,22 +5,46 @@
 #include "connection.h"
 
 namespace {
-    int REQUEST_TIMEOUT = 20000;
+    int REQUEST_TIMEOUT = 60000;
 }
 
-Request::Request(const QUrl &url, Connection *connection) :
-    m_networkRequest(url),
-    m_connection(connection)
+Request::Request()
 {
-    m_networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     m_requestTimer.setSingleShot(true);
-
     QObject::connect(&m_requestTimer, SIGNAL(timeout()), this, SLOT(timeout()));
 }
 
-void Request::run()
+void Request::setUrl(const QString& url) {
+    QUrl request_url(url);
+    m_networkRequest = QNetworkRequest(request_url);
+    m_networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+
+    addHeader("Accept", "application/json");
+    addHeader("Connection", "keep-alive");
+    addHeader("Sec-Fetch-Dest", "document");
+    addHeader("Sec-Fetch-Mode", "navigate");
+    addHeader("Sec-Fetch-Site", "same-site");
+}
+
+void Request::run(Connection* connection)
 {
-    networkReply = m_connection->networkAccessManager()->get(m_networkRequest);
+    auto quickconnect = connection->parameters().quickconnect;
+
+    auto url = QString("https://%1.fr.quickconnect.to").arg(quickconnect);
+    auto referer = QString("https://%1.quickconnect.to").arg(quickconnect);
+
+    url.append(url_);
+
+    if (add_sid_) {
+        auto sid = connection->parameters().sid;
+        url.append(QString("&_sid=%1").arg(sid));
+    }
+
+    setUrl(url);
+
+    addHeader("Referer", referer.toUtf8());
+
+    networkReply = connection->networkAccessManager()->get(m_networkRequest);
     m_requestTimer.start(REQUEST_TIMEOUT);
 
     QObject::connect(networkReply, &QIODevice::readyRead, [this]() {
@@ -30,10 +54,6 @@ void Request::run()
     QObject::connect(networkReply, &QNetworkReply::finished, [this]() {
         responseFinished(networkReply->error(), networkReply->errorString());
     });
-
-//    QObject::connect(networkReply, &QNetworkReply::redirected, [this](const QUrl &url) {
-//        qDebug() << "REDIRECT: " << url;
-//    });
 }
 
 void Request::addHeader(const QByteArray &key, const QByteArray &value)
@@ -64,13 +84,13 @@ void Request::responseFinished(QNetworkReply::NetworkError error, QString errorS
 
     if (error != QNetworkReply::NoError)
     {
-        std::cout << "ERROR: " << error << std::endl;
-        emit finished(ERROR, QByteArray());
+       qDebug() << error;
+        emit ready(ERROR, QByteArray());
         return ;
     }
 
     responseHeaders = networkReply->rawHeaderPairs();
-    emit finished(SUCCESS, responseArray);
+    emit ready(SUCCESS, responseArray);
 }
 
 QList<QPair<QByteArray, QByteArray>>& Request::getResponseHeaders()

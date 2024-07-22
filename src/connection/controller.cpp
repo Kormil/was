@@ -4,12 +4,12 @@
 #include "src/models/filelistmodel.h"
 #include "src/models/showpicturemodel.h"
 
+#include "src/connection/requests/loginrequest.h"
+#include "src/connection/requests/logoutrequest.h"
+#include "src/connection/requests/getthumbnailrequest.h"
+
 Q_DECLARE_METATYPE(FileListModel*)
 Q_DECLARE_METATYPE(ShowPictureModel*)
-
-namespace {
-    IdType RootId = 0;
-};
 
 Controller::Controller(QObject *parent) : QObject(parent) {
     connection_ = std::make_shared<Connection>();
@@ -48,12 +48,20 @@ void Controller::bindToQml()
 void Controller::login(const QString &quickconnect, const QString &login, const QString &password) {
     emit loginStarted();
 
-    connection_->login(quickconnect, login, password, [this](bool result) {
+    connection_->setQuickconnect(quickconnect);
+
+    auto handler = [this](bool result, const QString &sid) {
+        connection_->setSid(sid);
         loginResult = result;
 
         emit loginStatusChanged();
         emit loginCompleted();
-    });
+    };
+
+    auto request = std::make_shared<LoginRequest>(quickconnect, login, password, handler);
+    auto serial = connection_->addRequest(request);
+
+    connection_->runRequest(serial);
 }
 
 bool Controller::getLoginResult() {
@@ -72,21 +80,32 @@ void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileL
 }
 
 void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const QString &type) {
-    connection_->getThumbnail(Image::Size::SM, id, cacheKey, type, [this, cacheKey](const QImage& image) {
+    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::SM, id, cacheKey, type, [this, cacheKey](const QImage& image) {
         emit onGetThumbnailFinished(cacheKey, image);
     });
+
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
 }
 
 void Controller::getImage(const IdType &id, const QString &cacheKey, const QString &type) {
-    connection_->getThumbnail(Image::Size::XL, id, cacheKey, type, [this, cacheKey](const QImage& image) {
+    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::XL, id, cacheKey, type, [this, cacheKey](const QImage& image) {
         emit onGetImageFinished(cacheKey, image);
     });
+
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
 }
 
 void Controller::logout() {
-    connection_->logout([this]() {
+    auto handler = [this]() {
         loginResult = false;
 
         emit loginStatusChanged();
-    });
+    };
+
+    auto request = std::make_shared<LogoutRequest>(handler);
+    auto serial = connection_->addRequest(request);
+
+    connection_->runRequest(serial);
 }

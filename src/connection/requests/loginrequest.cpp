@@ -1,91 +1,43 @@
-﻿#include "request.h"
+﻿#include "loginrequest.h"
 
-#include <iostream>
+#include <QJsonDocument>
+#include <QJsonObject>
 
-#include "connection.h"
-
-namespace {
-    int REQUEST_TIMEOUT = 20000;
-    int NOT_SET = -1;
-}
-
-Request::Request(const QUrl &url, Connection *connection) :
-    m_networkRequest(url)
+LoginRequest::LoginRequest(const QString &quickconnect, const QString &login, const QString &password, HandlerType handler) :
+    Request()
 {
-    m_requestTimer.setSingleShot(true);
-    QObject::connect(&m_requestTimer, SIGNAL(timeout()), this, SLOT(timeout()));
+    add_sid_ = false;
 
-    setConnection(connection);
-}
+    url_ = QString("/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&format=sid").arg(login).arg(password);
 
-void Request::run()
-{
-    networkReply = m_connection->networkAccessManager()->get(m_networkRequest);
-    m_requestTimer.start(REQUEST_TIMEOUT);
+    QObject::connect(this, &Request::ready, [this, handler](Request::Status status, const QByteArray& responseArray) {
+        if (status == Request::ERROR) {
+            qDebug() << "Connection error";
+            handler(false, "");
+        } else {
+            qDebug() << responseArray;
+            auto response = parseAnswer(QJsonDocument::fromJson(responseArray));
+            handler(response.first, response.second);
+        }
 
-    QObject::connect(networkReply, &QIODevice::readyRead, [this]() {
-        responseArray.append(networkReply->readAll());
-    });
-
-    QObject::connect(networkReply, &QNetworkReply::finished, [this]() {
-        responseFinished(networkReply->error(), networkReply->errorString());
+        emit done(serial());
     });
 }
 
-void Request::addHeader(const QByteArray &key, const QByteArray &value)
-{
-    m_networkRequest.setRawHeader(key, value);
-}
+std::pair<bool, QString> LoginRequest::parseAnswer(const QJsonDocument &jsonDocument) {
+    if (jsonDocument.isNull())
+        return {false, ""};
 
-int Request::serial() const
-{
-    return m_serial;
-}
-
-void Request::setSerial(int serial)
-{
-    m_serial = serial;
-}
-
-void Request::timeout()
-{
-    networkReply->disconnect();
-    networkReply->abort();
-    responseFinished(QNetworkReply::TimeoutError, tr("Request timeout"));
-}
-
-void Request::responseFinished(QNetworkReply::NetworkError error, QString errorString)
-{
-    m_requestTimer.stop();
-
-    if (error != QNetworkReply::NoError)
-    {
-        std::cout << "ERROR: " << error << std::endl;
-        emit finished(ERROR, QByteArray());
-        return ;
+    const auto& object = jsonDocument.object();
+    const auto& data = object["data"];
+    if (data.isUndefined()) {
+        return {false, ""};
     }
 
-    responseHeaders = networkReply->rawHeaderPairs();
-    emit finished(SUCCESS, responseArray);
-}
+    const auto& data_object = data.toObject();
 
-QList<QPair<QByteArray, QByteArray>>& Request::getResponseHeaders()
-{
-    return responseHeaders;
-}
+    auto success = object["success"].toBool();
+    auto sid = data_object["sid"].toString();
 
-void Request::close() {
-    networkReply->disconnect();
-    networkReply->abort();
-    responseFinished(QNetworkReply::TimeoutError, tr("Request closed"));
-
-    if (connection_ && serial_ != NOT_SET) {
-        connection_->deleteRequest(serial_);
-    }
-}
-
-void Request::setConnection(Connection *connection) {
-    connection_ = connection;
-
-    serial_ = connection->nextSerial();
+    return {success, sid};
 }

@@ -3,6 +3,10 @@
 #include <algorithm>
 
 #include "src/models/filelistmodel.h"
+#include "src/connection/requests/countfoldersrequest.h"
+#include "src/connection/requests/countitemsrequest.h"
+#include "src/connection/requests/getfoldersrequest.h"
+#include "src/connection/requests/getitemsrequest.h"
 
 namespace {
 IdType InvalidId = -1;
@@ -50,14 +54,24 @@ void FilesManager::getItemsCounter(const FileListPtr &files) {
 
     for (const auto& file: *files) {
         if (file->isDir()) {
-            connection_->countOfDirectoryItems(file->id(), handler);
-            connection_->countOfDirectory(file->id(), handler);
+            auto count_items_request = std::make_shared<CountItemsRequest>(file->id(), handler);
+            auto count_items_serial = connection_->addRequest(count_items_request);
+            connection_->runRequest(count_items_serial);
+
+            auto count_folders_request = std::make_shared<CountFoldersRequest>(file->id(), handler);
+            auto count_folders_serial = connection_->addRequest(count_folders_request);
+            connection_->runRequest(count_folders_serial);
         }
     }
 
     // for main dir
-    connection_->countOfDirectoryItems(files->id(), handler);
-    connection_->countOfDirectory(files->id(), handler);
+    auto count_items_request = std::make_shared<CountItemsRequest>(files->id(), handler);
+    auto count_items_serial = connection_->addRequest(count_items_request);
+    connection_->runRequest(count_items_serial);
+
+    auto count_folders_request = std::make_shared<CountFoldersRequest>(files->id(), handler);
+    auto count_folders_serial = connection_->addRequest(count_folders_request);
+    connection_->runRequest(count_folders_serial);
 }
 
 void FilesManager::get(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler) {
@@ -84,20 +98,24 @@ void FilesManager::get(IdType id, unsigned int start_point, std::function<void(c
         --file_lists_iterator_;
     }
 
-    connection_->contentOfDirectory(id, [this, id, start_point, handler](const FileListPtr &files) {
+    auto request = std::make_shared<GetFoldersRequest>(id, [this, id, start_point, handler](const FileListPtr &files) {
         append(files);
 
         handler(file_lists_iterator_->second);
-        //fetchMoreItems(id, start_point, handler);
     });
 
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
 }
 
 void FilesManager::fetchMoreItems(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler) {
-    connection_->contentOfDirectoryItems(id, start_point, [this, handler](const FileListPtr &files) {
+    auto request = std::make_shared<GetItemsRequest>(id, start_point, [this, handler](const FileListPtr &files) {
         append(files);
         handler(file_lists_iterator_->second);
     });
+
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
 }
 
 FilePtr FilesManager::getFile(IdType file_id) {
