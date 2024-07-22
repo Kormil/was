@@ -9,6 +9,7 @@ pkg_search_module(SAILFISH sailfishsecrets REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(KORPHO_SOURCES
@@ -53,7 +54,22 @@ set(KORPHO_SOURCES
     src/harbour-was.cpp
 )
 
-add_executable(harbour-was ${KORPHO_SOURCES})
+set(KORPHO_QML_SOURCES
+    qml/harbour-was.qml
+    qml/cover/CoverPage.qml
+    qml/pages/FirstPage.qml
+    qml/pages/SecondPage.qml
+    qml/pages/AboutPage.qml
+    qml/pages/LicensePage.qml
+    qml/dialogs/LoginDialog.qml
+    qml/dialogs/SaveLoginDataDialog.qml
+    qml/dialogs/AutoLoginOnStartDialog.qml
+    qml/items/DictionaryPictureItem.qml
+    )
+
+qt5_add_resources(graphics.qrc)
+
+add_executable(harbour-was ${KORPHO_SOURCES} ${KORPHO_QML_SOURCES} graphics.qrc)
 target_compile_definitions(harbour-was PRIVATE
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
 )
@@ -93,23 +109,22 @@ install(FILES icons/128x128/harbour-was.png
 install(FILES icons/172x172/harbour-was.png
     DESTINATION share/icons/hicolor/172x172/apps
 )
+install(FILES LICENSE
+    DESTINATION share/harbour-was
+)
 
 # Get the other files reachable from the project tree in Qt Creator
 FILE(GLOB TsFiles "translations/*.ts")
 add_custom_target(distfiles
     SOURCES
         harbour-was.desktop
-        qml/harbour-was.qml
-        qml/cover/CoverPage.qml
-        qml/pages/FirstPage.qml
-        qml/dialogs/LoginDialog.qml
-        qml/dialogs/SaveLoginDataDialog.qml
-        qml/dialogs/AutoLoginOnStartDialog.qml
-        qml/items/DictionaryPictureItem.qml
+        ${KORPHO_QML_SOURCES}
         rpm/harbour-was.changes.in
         rpm/harbour-was.changes.run.in
         rpm/harbour-was.spec
         rpm/harbour-was.yaml
+        graphics.qrc
+        LICENSE
         ${TsFiles})
 
 # Tell Qt Creator where the application executable(s) would be located on the

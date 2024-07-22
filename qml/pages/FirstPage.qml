@@ -82,17 +82,22 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
-            visible: logging === false
+            MenuItem {
+                text: qsTr("About Was")
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
+                }
+            }
 
             MenuItem {
-                visible: !Controller.logged
+                visible: !Controller.logged && logging === false
 
                 text: qsTr("Login")
                 onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {fileListModel: fileListModel})
             }
 
             MenuItem {
-                visible: Controller.logged
+                visible: Controller.logged && logging === false
 
                 text: qsTr("Logout")
                 onClicked: Controller.logout()

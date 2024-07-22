@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/172x172/harbour-was.png</file>
+    </qresource>
+</RCC>
