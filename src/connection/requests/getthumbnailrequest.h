@@ -12,7 +12,7 @@ class GetThumbnailRequest : public Request {
 public:
     using HandlerType = std::function<void (const QImage&)>;
 
-    GetThumbnailRequest(Image::Size size, IdType id, QString cacheKey, QString type, HandlerType handler);
+    GetThumbnailRequest(Image::Size size, IdType id, QString cacheKey, QString type, Request::Space space, HandlerType handler);
 };
 
 

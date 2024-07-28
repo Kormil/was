@@ -6,7 +6,6 @@ FileListModel::FileListModel(QObject *parent)
     : QAbstractListModel(parent),
       files_(nullptr)
 {
-    auto& controller = Controller::instance();
 }
 
 int FileListModel::rowCount(const QModelIndex &parent) const
@@ -15,6 +14,10 @@ int FileListModel::rowCount(const QModelIndex &parent) const
         return 0;
 
     return files_->size();
+}
+
+void FileListModel::clear() {
+    setList(nullptr);
 }
 
 QVariant FileListModel::data(const QModelIndex &index, int role) const

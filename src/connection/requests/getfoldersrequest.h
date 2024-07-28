@@ -10,7 +10,7 @@ class GetFoldersRequest : public Request {
 public:
     using HandlerType =  std::function<void (FileListPtr)>;
 
-    GetFoldersRequest(IdType id, HandlerType handler);
+    GetFoldersRequest(IdType id, Space space, HandlerType handler);
     FileListPtr parseAnswer(const QJsonDocument &jsonDocument);
 };
 

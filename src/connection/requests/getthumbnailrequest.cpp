@@ -2,7 +2,7 @@
 
 #include <QJsonDocument>
 
-GetThumbnailRequest::GetThumbnailRequest(Image::Size size, IdType id, QString cacheKey, QString type, HandlerType handler) :
+GetThumbnailRequest::GetThumbnailRequest(Image::Size size, IdType id, QString cacheKey, QString type, Request::Space space, HandlerType handler) :
     Request()
 {
     QString size_text;
@@ -13,7 +13,13 @@ GetThumbnailRequest::GetThumbnailRequest(Image::Size size, IdType id, QString ca
         case Image::Size::XL: size_text = "xl"; break;
     }
 
-    url_ = QString("/webapi/entry.cgi?api=SYNO.FotoTeam.Thumbnail&method=get&version=2&id=%1&cache_key=%2&type=%3&size=%4").arg(id).arg(cacheKey).arg(type).arg(size_text);
+    if (space == Request::PERSONAL) {
+        api_ = "entry.cgi?api=SYNO.Foto.Thumbnail";
+    } else {
+        api_ = "entry.cgi?api=SYNO.FotoTeam.Thumbnail";
+    }
+
+    parameters_ = QString("method=get&version=2&id=%1&cache_key=%2&type=%3&size=%4").arg(id).arg(cacheKey).arg(type).arg(size_text);
 
     QObject::connect(this, &Request::ready, [this, handler](Request::Status status, const QByteArray& responseArray) {
         QImage pixmap;

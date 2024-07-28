@@ -10,7 +10,7 @@ class CountItemsRequest : public Request {
 public:
     using HandlerType = std::function<void (int, int)>;
 
-    CountItemsRequest(IdType id, HandlerType handler);
+    CountItemsRequest(IdType id, Space space, HandlerType handler);
     int parseAnswer(const QJsonDocument &jsonDocument);
 };
 

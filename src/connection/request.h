@@ -21,6 +21,14 @@ public:
         ERROR
     };
 
+    enum Space
+    {
+        PERSONAL,
+        SHARED
+    };
+
+    Q_ENUM(Space)
+
     Request();
     void run(Connection* connection);
 
@@ -39,7 +47,8 @@ protected:
     void setUrl(const QString& url);
 
     bool add_sid_ = true;
-    QString url_;
+    QString parameters_;
+    QString api_;
 
 private slots:
     void timeout();

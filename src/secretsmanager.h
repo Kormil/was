@@ -39,4 +39,4 @@ private:
     const QString COLLECTION_NAME = "WasAppSecrets";
 };
 
-#endif // SETTINGS_H
+#endif // SECRETSMANAGER_H

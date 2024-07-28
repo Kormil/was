@@ -10,7 +10,7 @@ class GetItemsRequest : public Request {
 public:
     using HandlerType =  std::function<void (FileListPtr)>;
 
-    GetItemsRequest(IdType id, unsigned int start_point, HandlerType handler);
+    GetItemsRequest(IdType id, unsigned int start_point, Space space, HandlerType handler);
     FileListPtr parseAnswer(const QJsonDocument &jsonDocument);
 };
 

@@ -33,13 +33,19 @@ void Request::run(Connection* connection)
     auto url = QString("https://%1.fr.quickconnect.to").arg(quickconnect);
     auto referer = QString("https://%1.quickconnect.to").arg(quickconnect);
 
-    url.append(url_);
+    url.append("/webapi/");
+    url.append(api_);
+    if (parameters_.size()) {
+        url.append("&");
+        url.append(parameters_);
+    }
 
     if (add_sid_) {
         auto sid = connection->parameters().sid;
         url.append(QString("&_sid=%1").arg(sid));
     }
 
+    qDebug() << url;
     setUrl(url);
 
     addHeader("Referer", referer.toUtf8());

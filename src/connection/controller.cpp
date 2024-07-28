@@ -3,7 +3,7 @@
 
 #include "src/models/filelistmodel.h"
 #include "src/models/showpicturemodel.h"
-
+#include "src/settings.h"
 #include "src/connection/requests/loginrequest.h"
 #include "src/connection/requests/logoutrequest.h"
 #include "src/connection/requests/getthumbnailrequest.h"
@@ -68,6 +68,15 @@ bool Controller::getLoginResult() {
     return loginResult;
 }
 
+void Controller::clear(FileListModel* file_list_model) {
+    emit photosLoading();
+
+    file_list_model->clear();
+    files_manager_->clear();
+
+    emit photosLoaded();
+}
+
 void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel* file_list_model) {
     emit photosLoading();
 
@@ -80,7 +89,9 @@ void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileL
 }
 
 void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const QString &type) {
-    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::SM, id, cacheKey, type, [this, cacheKey](const QImage& image) {
+    auto space = Settings::instance()->apiSpace();
+
+    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::SM, id, cacheKey, type, space, [this, cacheKey](const QImage& image) {
         emit onGetThumbnailFinished(cacheKey, image);
     });
 
@@ -89,7 +100,9 @@ void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const Q
 }
 
 void Controller::getImage(const IdType &id, const QString &cacheKey, const QString &type) {
-    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::XL, id, cacheKey, type, [this, cacheKey](const QImage& image) {
+    auto space = Settings::instance()->apiSpace();
+
+    auto request = std::make_shared<GetThumbnailRequest>(Image::Size::XL, id, cacheKey, type, space, [this, cacheKey](const QImage& image) {
         emit onGetImageFinished(cacheKey, image);
     });
 

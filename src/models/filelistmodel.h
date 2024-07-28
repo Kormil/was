@@ -41,6 +41,8 @@ public:
 
     void setList(const FileListPtr &files);
 
+    void clear();
+
 protected:
     bool canFetchMore(const QModelIndex &parent) const override;
     void fetchMore(const QModelIndex &parent) override;

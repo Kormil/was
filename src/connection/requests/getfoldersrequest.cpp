@@ -5,10 +5,16 @@
 
 #include "src/types/dir.h"
 
-GetFoldersRequest::GetFoldersRequest(IdType id, HandlerType handler) :
+GetFoldersRequest::GetFoldersRequest(IdType id, Request::Space space, HandlerType handler) :
     Request()
 {
-    url_ = QString("/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Folder&version=2&method=list&offset=0&limit=100&id=%1&additional=[%22thumbnail%22]").arg(id);
+    if (space == Request::PERSONAL) {
+        api_ = "entry.cgi?api=SYNO.Foto.Browse.Folder";
+    } else {
+        api_ = "entry.cgi?api=SYNO.FotoTeam.Browse.Folder";
+    }
+
+    parameters_ = QString("version=2&method=list&offset=0&limit=100&id=%1&additional=[%22thumbnail%22]").arg(id);
 
     QObject::connect(this, &Request::ready, [this, id, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {

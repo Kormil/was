@@ -25,6 +25,8 @@ public:
 
     void getItemsCounter(const FileListPtr &files);
 
+    void clear();
+
 private:
     void append(const FileListPtr &files);
     void fetchMoreItems(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler);

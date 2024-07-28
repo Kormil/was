@@ -5,10 +5,16 @@
 
 #include "src/types/image.h"
 
-GetItemsRequest::GetItemsRequest(IdType id, unsigned int start_point, HandlerType handler) :
+GetItemsRequest::GetItemsRequest(IdType id, unsigned int start_point, Request::Space space, HandlerType handler) :
     Request()
 {
-    url_ = QString("/webapi/entry.cgi?api=SYNO.FotoTeam.Browse.Item&version=1&method=list&offset=%1&limit=100&folder_id=%2&additional=[%22thumbnail%22]").arg(start_point).arg(id);
+    if (space == Request::PERSONAL) {
+        api_ = "entry.cgi?api=SYNO.Foto.Browse.Item";
+    } else {
+        api_ = "entry.cgi?api=SYNO.FotoTeam.Browse.Item";
+    }
+
+    parameters_ = QString("version=1&method=list&offset=%1&limit=100&folder_id=%2&additional=[%22thumbnail%22]").arg(start_point).arg(id);
 
     QObject::connect(this, &Request::ready, [this, id, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {

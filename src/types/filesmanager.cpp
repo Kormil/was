@@ -2,19 +2,20 @@
 
 #include <algorithm>
 
+#include "src/settings.h"
 #include "src/models/filelistmodel.h"
 #include "src/connection/requests/countfoldersrequest.h"
 #include "src/connection/requests/countitemsrequest.h"
 #include "src/connection/requests/getfoldersrequest.h"
 #include "src/connection/requests/getitemsrequest.h"
 
-namespace {
-IdType InvalidId = -1;
-IdType RootId = 0;
-}
-
 FilesManager::FilesManager(const ConnectionPtr& connection) :
     connection_(connection) {
+    file_lists_iterator_ = file_lists_.begin();
+}
+
+void FilesManager::clear() {
+    file_lists_.clear();
     file_lists_iterator_ = file_lists_.begin();
 }
 
@@ -52,24 +53,26 @@ void FilesManager::getItemsCounter(const FileListPtr &files) {
         files->setData(subdir_id, FileListModel::FileListRole::ItemCounterRole, count + current_count);
     };
 
+    auto space = Settings::instance()->apiSpace();
+
     for (const auto& file: *files) {
         if (file->isDir()) {
-            auto count_items_request = std::make_shared<CountItemsRequest>(file->id(), handler);
+            auto count_items_request = std::make_shared<CountItemsRequest>(file->id(), space, handler);
             auto count_items_serial = connection_->addRequest(count_items_request);
             connection_->runRequest(count_items_serial);
 
-            auto count_folders_request = std::make_shared<CountFoldersRequest>(file->id(), handler);
+            auto count_folders_request = std::make_shared<CountFoldersRequest>(file->id(), space, handler);
             auto count_folders_serial = connection_->addRequest(count_folders_request);
             connection_->runRequest(count_folders_serial);
         }
     }
 
     // for main dir
-    auto count_items_request = std::make_shared<CountItemsRequest>(files->id(), handler);
+    auto count_items_request = std::make_shared<CountItemsRequest>(files->id(), space, handler);
     auto count_items_serial = connection_->addRequest(count_items_request);
     connection_->runRequest(count_items_serial);
 
-    auto count_folders_request = std::make_shared<CountFoldersRequest>(files->id(), handler);
+    auto count_folders_request = std::make_shared<CountFoldersRequest>(files->id(), space, handler);
     auto count_folders_serial = connection_->addRequest(count_folders_request);
     connection_->runRequest(count_folders_serial);
 }
@@ -98,7 +101,8 @@ void FilesManager::get(IdType id, unsigned int start_point, std::function<void(c
         --file_lists_iterator_;
     }
 
-    auto request = std::make_shared<GetFoldersRequest>(id, [this, id, start_point, handler](const FileListPtr &files) {
+    auto space = Settings::instance()->apiSpace();
+    auto request = std::make_shared<GetFoldersRequest>(id, space, [this, id, start_point, handler](const FileListPtr &files) {
         append(files);
 
         handler(file_lists_iterator_->second);
@@ -109,7 +113,9 @@ void FilesManager::get(IdType id, unsigned int start_point, std::function<void(c
 }
 
 void FilesManager::fetchMoreItems(IdType id, unsigned int start_point, std::function<void(const FileListPtr &files)> handler) {
-    auto request = std::make_shared<GetItemsRequest>(id, start_point, [this, handler](const FileListPtr &files) {
+    auto space = Settings::instance()->apiSpace();
+
+    auto request = std::make_shared<GetItemsRequest>(id, start_point, space, [this, handler](const FileListPtr &files) {
         append(files);
         handler(file_lists_iterator_->second);
     });

@@ -10,7 +10,7 @@ class CountFoldersRequest : public Request {
 public:
     using HandlerType = std::function<void (int, int)>;
 
-    CountFoldersRequest(IdType id, HandlerType handler);
+    CountFoldersRequest(IdType id, Space space, HandlerType handler);
     int parseAnswer(const QJsonDocument &jsonDocument);
 };
 

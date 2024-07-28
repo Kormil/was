@@ -8,7 +8,8 @@ LoginRequest::LoginRequest(const QString &quickconnect, const QString &login, co
 {
     add_sid_ = false;
 
-    url_ = QString("/webapi/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account=%2&passwd=%3&format=sid").arg(login).arg(password);
+    api_ = "auth.cgi?api=SYNO.API.Auth";
+    parameters_ = QString("version=3&method=login&account=%2&passwd=%3&format=sid").arg(login).arg(password);
 
     QObject::connect(this, &Request::ready, [this, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {

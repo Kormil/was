@@ -25,6 +25,15 @@ Page {
             loginLabel.visible = false
             logging = false
 
+            Controller.clear(fileListModel)
+            Controller.contentOfPhotoDirectory(0, 0, fileListModel)
+        }
+    }
+
+    Connections {
+        target: Settings
+        onApiSpaceChanged: {
+            Controller.clear(fileListModel)
             Controller.contentOfPhotoDirectory(0, 0, fileListModel)
         }
     }
@@ -101,6 +110,22 @@ Page {
 
                 text: qsTr("Logout")
                 onClicked: Controller.logout()
+            }
+
+            MenuItem {
+                visible: Settings.api_space === 0 && Controller.logged && logging === false
+                text: qsTr("Change to shared space")
+                onClicked: {
+                    Settings.api_space = 1
+                }
+            }
+
+            MenuItem {
+                visible: Settings.api_space === 1 && Controller.logged && logging === false
+                text: qsTr("Change to personal space")
+                onClicked: {
+                    Settings.api_space = 0
+                }
             }
         }
 

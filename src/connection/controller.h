@@ -28,6 +28,7 @@ public:
     Q_INVOKABLE void logout();
     Q_INVOKABLE bool getLoginResult();
 
+    Q_INVOKABLE void clear(FileListModel* file_list_model);
     Q_INVOKABLE void contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel *file_list_model);
 
 

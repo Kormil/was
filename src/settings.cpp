@@ -8,6 +8,11 @@
 #define LOGIN_QUICKCONNECT_SETTINGS_PATH QStringLiteral("login/quickconnect")
 #define LOGIN_USERLOGIN_SETTINGS_PATH QStringLiteral("login/userlogin")
 #define LOGIN_PASSWORD_SETTINGS_PATH QStringLiteral("login/password")
+#define API_SPACE_SETTINGS_PATH QStringLiteral("api/space")
+
+namespace {
+int API_PERSONAL_SPACE = 0;
+}
 
 Settings::Settings(QObject *parent) {
     const QString settingsPath =
@@ -18,6 +23,8 @@ Settings::Settings(QObject *parent) {
     secrets_manager_.isCollectionExistsInSecretsManager([this](){
         emit initialized();
     });
+
+    api_space_= m_settings->value(API_SPACE_SETTINGS_PATH, API_PERSONAL_SPACE).value<Request::Space>();
 }
 
 bool Settings::autologin() const
@@ -84,6 +91,11 @@ QObject *Settings::instance(QQmlEngine *engine, QJSEngine *scriptEngine)
     Q_UNUSED(engine)
     Q_UNUSED(scriptEngine)
 
+    return instance();
+}
+
+Settings *Settings::instance()
+{
     static Settings instance;
     return &instance;
 }
@@ -121,4 +133,19 @@ void Settings::saveSettings() {
             secrets_manager_.saveToSecretsManager(LOGIN_PASSWORD_SETTINGS_PATH, user_password_);
         }
     });
+}
+
+Request::Space Settings::apiSpace() const
+{
+    return api_space_;
+}
+
+void Settings::setApiSpace(Request::Space value)
+{
+    if (apiSpace() != value) {
+        m_settings->setValue(API_SPACE_SETTINGS_PATH, value);
+        api_space_ = value;
+
+        emit apiSpaceChanged();
+    }
 }
