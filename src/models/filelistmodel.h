@@ -29,7 +29,9 @@ public:
         IsDirRole,
         CacheKeyRole,
         CreateTimeRole,
-        ItemCounterRole,
+        AllItemsCounterRole,
+        ItemsCounterRole,
+        FoldersCounterRole,
         PhotoSourceRole
     };
 
@@ -39,6 +41,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void appendList(const FileListPtr &files);
     void setList(const FileListPtr &files);
 
     void clear();
@@ -51,7 +54,7 @@ signals:
     void filesLoaded();
 
 private:
-    FileListPtr files_;
+    FileListPtr items_;
 };
 
 using FileListModelPtr = std::shared_ptr<FileListModel>;

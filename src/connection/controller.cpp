@@ -7,6 +7,7 @@
 #include "src/connection/requests/loginrequest.h"
 #include "src/connection/requests/logoutrequest.h"
 #include "src/connection/requests/getthumbnailrequest.h"
+#include "src/connection/requests/getrootfoldersrequest.h"
 
 Q_DECLARE_METATYPE(FileListModel*)
 Q_DECLARE_METATYPE(ShowPictureModel*)
@@ -69,22 +70,45 @@ bool Controller::getLoginResult() {
 }
 
 void Controller::clear(FileListModel* file_list_model) {
-    emit photosLoading();
+   // emit itemsLoading();
 
     file_list_model->clear();
     files_manager_->clear();
 
-    emit photosLoaded();
+    //emit itemsLoaded();
 }
 
-void Controller::contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel* file_list_model) {
-    emit photosLoading();
+void Controller::getRootFolder() {
+    emit rootFolderIdLoading();
 
-    files_manager_->get(id, start_point, [this, file_list_model](const FileListPtr& file_list) {
-        file_list_model->setList(file_list);
-        files_manager_->getItemsCounter(file_list);
+    auto space = Settings::instance()->apiSpace();
 
-        emit photosLoaded();
+    auto request = std::make_shared<GetRootFoldersRequest>(space, [this](int id) {
+        emit rootFolderIdLoaded(id);
+    });
+
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
+}
+
+void Controller::getFolders(int id, FileListModel* file_list_model) {
+    emit foldersLoading();
+
+    files_manager_->getFolders(id, [=](const FileListPtr& folders) {
+        files_manager_->getItemsCounterForParent(folders);
+        files_manager_->getItemsCounter(folders);
+
+        file_list_model->setList(folders);
+        emit foldersLoaded(folders->id());
+    });
+}
+
+void Controller::getItemsInFolder(int id, FileListModel* file_list_model) {
+    emit itemsLoading();
+
+    files_manager_->getItems(id, [=](const FileListPtr& files) {
+        file_list_model->setList(files);
+        emit itemsLoaded(files->id());
     });
 }
 

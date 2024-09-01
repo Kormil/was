@@ -13,30 +13,49 @@ Page {
 
     id: page
 
+    onActiveFocusChanged: {
+        resetCoverPage()
+    }
+
     FileListModel {
-        id: fileListModel
+        id: foldersModel
+    }
+
+    FileListModel {
+        id: filesModel
     }
 
     Connections {
         target: Controller
-        onPhotosLoading: {
+        onFoldersLoading: {
             loadingIndicator.running = true
             loadingIndicator.visible = true
-            loginLabel.visible = false
+            foldersView.visible = false
+            filesView.visible = false
         }
     }
 
     Connections {
         target: Controller
-        onPhotosLoaded: {
+        onFoldersLoaded: {
+            if (page.download_id === folder_id) {
+                Controller.getItemsInFolder(page.download_id, filesModel)
+            }
+        }
+    }
+
+    Connections {
+        target: Controller
+        onItemsLoaded: {
             loadingIndicator.running = false
             loadingIndicator.visible = false
-            loginLabel.visible = false
+            foldersView.visible = true
+            filesView.visible = true
         }
     }
 
     Component.onCompleted: {
-        Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
+        Controller.getFolders(page.download_id, foldersModel)
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -46,30 +65,53 @@ Page {
     SilicaFlickable {
         anchors.fill: parent
 
-        SilicaListView {
-            id: listView
-
-            model: fileListModel
-
+        Column {
             anchors.fill: parent
             spacing: 0
 
-            header: PageHeader {
-                id: title
-                title: dir_name
+            SilicaListView {
+                id: foldersView
+
+                model: foldersModel
+
+                width: parent.width
+                height: contentHeight
+
+                spacing: 0
+
+                header: PageHeader {
+                    id: title
+                    title: dir_name
+                }
+
+                delegate: DictionaryPictureItem {
+                    onClicked: {
+                        changeFolderForCover(model.id)
+                        pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
+                    }
+                }
+
+                VerticalScrollDecorator {}
             }
 
-            delegate: DictionaryPictureItem {
-                onClicked: {
-                    if (model.is_dir === true) {
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
-                    } else {
+            SilicaListView {
+                id: filesView
+
+                model: filesModel
+
+                width: parent.width
+                height: contentHeight
+
+                spacing: 0
+
+                delegate: DictionaryPictureItem {
+                    onClicked: {
                         pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
                     }
                 }
-            }
 
-            VerticalScrollDecorator {}
+                VerticalScrollDecorator {}
+            }
         }
 
         BusyIndicator {

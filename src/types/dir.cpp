@@ -35,12 +35,20 @@ void Dir::fromJson(QJsonObject &json) {
     }
 }
 
-void Dir::setCount(int count) {
-    count_ = count;
+void Dir::setItemsCount(int count) {
+    count_items_ = count;
 }
 
-int Dir::count() const {
-    return count_;
+void Dir::setFoldersCount(int count) {
+    count_folders_ = count;
+}
+
+int Dir::countAllItems() const {
+    return count_items_ + count_folders_;
+}
+
+int Dir::countItems() const {
+    return count_items_;
 }
 
 QString Dir::cacheKey() const {

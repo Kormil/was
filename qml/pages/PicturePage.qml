@@ -7,6 +7,7 @@ import ShowPictureModel 1.0
 import Controller 1.0
 
 import "../dialogs"
+import "../cover"
 
 Page {
     property int download_id: 0
@@ -20,8 +21,10 @@ Page {
 
     Component.onCompleted: {
         if (page.download_id !== 0) {
-            Controller.contentOfPhotoDirectory(page.download_id, 0, fileListModel)
+            Controller.getItemsInFolder(page.download_id, fileListModel)
         }
+
+        changeCoverPage(picture_cover_component)
     }
 
     onStatusChanged: {
@@ -36,6 +39,7 @@ Page {
         anchors.fill: parent
         color: "black";
     }
+
 
     Binding {
         target: fileListModel;
@@ -64,9 +68,19 @@ Page {
             clip: true
 
             ImageViewer {
+                id: mainImage
                 source: model.photo_source
                 anchors.fill: parent
             }
+        }
+    }
+
+    Component {
+        id: picture_cover_component
+
+        PictureCover {
+            id: picture_cover
+            picture_source: fileListModel.current_picture_source
         }
     }
 }

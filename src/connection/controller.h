@@ -29,7 +29,9 @@ public:
     Q_INVOKABLE bool getLoginResult();
 
     Q_INVOKABLE void clear(FileListModel* file_list_model);
-    Q_INVOKABLE void contentOfPhotoDirectory(int id, unsigned int start_point, FileListModel *file_list_model);
+    Q_INVOKABLE void getRootFolder();
+    Q_INVOKABLE void getFolders(int id, FileListModel* file_list_model);
+    Q_INVOKABLE void getItemsInFolder(int id, FileListModel* file_list_model);
 
 
 public slots:
@@ -41,8 +43,14 @@ signals:
     void loginCompleted();
     void loginStatusChanged();
 
-    void photosLoading();
-    void photosLoaded();
+    void itemsLoading();
+    void itemsLoaded(int folder_id);
+
+    void foldersLoading();
+    void foldersLoaded(int folder_id);
+
+    void rootFolderIdLoading();
+    void rootFolderIdLoaded(int folder_id);
 
     void onGetThumbnailFinished(const QString &, const QImage &);
     void onGetImageFinished(const QString &, const QImage &);

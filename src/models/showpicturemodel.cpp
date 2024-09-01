@@ -13,7 +13,6 @@ bool ShowPictureModel::canFetchMore(const QModelIndex &parent) const
         return false;
     }
 
-    qDebug() << rowCount() << " < " << current_index_ + 5;
     return rowCount() < current_index_ + 5;
 }
 
@@ -22,6 +21,11 @@ int ShowPictureModel::currentIndex() const {
 }
 
 void ShowPictureModel::setCurrentIndex(int value) {
-    qDebug() << value;
     current_index_ = value;
+
+    emit currentPictureSourceChanged();
+}
+
+QString ShowPictureModel::currentPictureSource() {
+    return index(current_index_, 0).data(FileListRole::PhotoSourceRole).toString();
 }

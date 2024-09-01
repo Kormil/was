@@ -28,6 +28,7 @@ public:
 
     FilePtr getByIndex(int index);
     FilePtr get(const IdType& id);
+    bool has(const IdType& id);
 
     void setParentFile(const FilePtr& parent);
     const FilePtr& parentFile();
@@ -39,7 +40,10 @@ public:
 
     std::vector<IdType> getAllIds() const;
 
-    unsigned int getAllFilesCounter() const;
+    void setItemsCount(int count);
+    void setFoldersCount(int count);
+    unsigned int countItems() const;
+    unsigned int countAllItems() const;
     bool canFetchMore() const;
 
     QVariant data(const IdType file_id, int role);
@@ -48,10 +52,12 @@ public:
     DataType::const_iterator begin() const { return files_.begin(); }
     DataType::const_iterator end() const { return files_.end(); }
 
+    unsigned int already_downloaded_files_ = 0;
 signals:
     void preItemAppended(int);
     void postItemAppended();
     void dataChanged(int, int);
+    void countChanged(int);
 
 private:
     unsigned int all_files_counter_ = 0;

@@ -23,6 +23,8 @@ set(KORPHO_SOURCES
     src/connection/requests/logoutrequest.h
     src/connection/requests/getfoldersrequest.cpp
     src/connection/requests/getfoldersrequest.h
+    src/connection/requests/getrootfoldersrequest.cpp
+    src/connection/requests/getrootfoldersrequest.h
     src/connection/requests/getitemsrequest.cpp
     src/connection/requests/getitemsrequest.h
     src/connection/requests/countfoldersrequest.cpp
@@ -57,14 +59,17 @@ set(KORPHO_SOURCES
 set(KORPHO_QML_SOURCES
     qml/harbour-was.qml
     qml/cover/CoverPage.qml
+    qml/cover/PictureCover.qml
     qml/pages/FirstPage.qml
     qml/pages/SecondPage.qml
     qml/pages/AboutPage.qml
     qml/pages/LicensePage.qml
+    qml/pages/PicturePage.qml
     qml/dialogs/LoginDialog.qml
     qml/dialogs/SaveLoginDataDialog.qml
     qml/dialogs/AutoLoginOnStartDialog.qml
     qml/items/DictionaryPictureItem.qml
+    qml/items/AnimatedImage.qml
     )
 
 qt5_add_resources(graphics.qrc)

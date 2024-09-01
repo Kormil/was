@@ -4,16 +4,16 @@
 
 FileListModel::FileListModel(QObject *parent)
     : QAbstractListModel(parent),
-      files_(nullptr)
+      items_(nullptr)
 {
 }
 
 int FileListModel::rowCount(const QModelIndex &parent) const
 {
-    if (parent.isValid() || files_ == nullptr)
+    if (parent.isValid() || items_ == nullptr)
         return 0;
 
-    return files_->size();
+    return items_->size();
 }
 
 void FileListModel::clear() {
@@ -22,10 +22,10 @@ void FileListModel::clear() {
 
 QVariant FileListModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || files_ == nullptr)
+    if (!index.isValid() || items_ == nullptr)
         return QVariant();
 
-    const FilePtr file = files_->getByIndex(index.row());
+    const FilePtr& file = items_->getByIndex(index.row());
     if (!file) {
         return QVariant();
     }
@@ -50,8 +50,8 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     case FileListRole::CreateTimeRole: {
         return QVariant(file->createTime());
     }
-    case FileListRole::ItemCounterRole: {
-        return QVariant(file->count());
+    case FileListRole::AllItemsCounterRole: {
+        return QVariant(file->countAllItems());
     }
     case FileListRole::PhotoSourceRole: {
         return QVariant(file->photoSource());
@@ -72,39 +72,55 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     names[FileListRole::IsDirRole] = "is_dir";
     names[FileListRole::CacheKeyRole] = "cache_key";
     names[FileListRole::CreateTimeRole] = "create_time";
-    names[FileListRole::ItemCounterRole] = "item_counter";
+    names[FileListRole::AllItemsCounterRole] = "item_counter";
     names[FileListRole::PhotoSourceRole] = "photo_source";
 
     return names;
 }
 
+void FileListModel::appendList(const FileListPtr &files) {
+    items_->appendList(files);
+}
+
 void FileListModel::setList(const FileListPtr &files)
 {
-    if (files == files_) {
+    if (files == items_) {
         return;
     }
 
     beginResetModel();
 
-    if (files_) {
-        files_->disconnect(this);
+    if (items_) {
+        items_->disconnect(this);
     }
 
-    files_ = files;
+    items_ = files;
 
-    if (files_) {
-        connect(files_.get(), &FileList::preItemAppended, this, [this](int size) {
-            const int index = files_->size();
+    if (items_) {
+        connect(items_.get(), &FileList::preItemAppended, this, [this](int size) {
+            const int index = items_->size();
             beginInsertRows(QModelIndex(), index, index + size - 1);
         });
 
-        connect(files_.get(), &FileList::postItemAppended, this, [this]() {
+        connect(items_.get(), &FileList::postItemAppended, this, [this]() {
             endInsertRows();
         });
 
-        connect(files_.get(), &FileList::dataChanged, this, [this](int row, int role) {
+        connect(items_.get(), &FileList::dataChanged, this, [this](int row, int role) {
             auto index = createIndex(row, 0);
             emit dataChanged(index, index, {role});
+        });
+
+        connect(items_.get(), &FileList::countChanged, this, [this](int id) {
+            qDebug() << "countChanged: " << id << " : " << items_->index(id);
+
+
+//            auto index = createIndex(items_->index(id), 0);
+//            emit dataChanged(index, index, {AllItemsCounterRole});
+
+            if (canFetchMore(QModelIndex())) {
+                fetchMore(QModelIndex());
+            }
         });
     }
 
@@ -114,21 +130,20 @@ void FileListModel::setList(const FileListPtr &files)
 
 bool FileListModel::canFetchMore(const QModelIndex &parent) const
 {
-    if (parent.isValid() || !files_) {
+    if (parent.isValid() || !items_) {
         return false;
     }
 
-    return files_->canFetchMore();
+    return items_->canFetchMore();
 }
 
 void FileListModel::fetchMore(const QModelIndex &parent)
 {
-    if (parent.isValid() || !files_) {
-        return;
-    }
+//    if (parent.isValid() || !items_) {
+//        return;
+//    }
 
-    const int start_point = files_->size();
-
-    auto& controller = Controller::instance();
-    controller.contentOfPhotoDirectory(files_->id(), start_point, this);
+//    auto& controller = Controller::instance();
+//    controller.getItemsInFolder(items_->id());
 }
+

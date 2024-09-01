@@ -2,12 +2,12 @@
 
 #include <algorithm>
 
+#include "src/types/dir.h"
 #include "src/models/filelistmodel.h"
 
 FileList::FileList(QObject *qboject) :
     QObject(qboject)
 {
-
 }
 
 FileList::~FileList() {
@@ -45,6 +45,15 @@ FilePtr FileList::get(const IdType& id)
     return nullptr;
 }
 
+bool FileList::has(const IdType& id) {
+    auto row = id_to_row_.find(id);
+    if (row != id_to_row_.end()) {
+        return true;
+    }
+
+    return false;
+}
+
 int FileList::index(const IdType& id) const {
     auto row = id_to_row_.find(id);
     if (row != id_to_row_.end()) {
@@ -69,10 +78,14 @@ void FileList::append(const FilePtr &file)
         files_.push_back(file);
         id_to_row_[file->id()] = row;
 
+        if (!file->isDir()) {
+            ++already_downloaded_files_;
+        }
+
         emit postItemAppended();
     }
 }
-
+#include <QDebug>
 void FileList::appendList(const FileListPtr &files)
 {
     if (!files) {
@@ -83,7 +96,6 @@ void FileList::appendList(const FileListPtr &files)
 
     for (auto& file: files->files_) {
         auto FileIt = id_to_row_.find(file->id());
-
         if (id_to_row_.end() != FileIt) {
             continue;
         }
@@ -102,6 +114,12 @@ void FileList::appendList(const FileListPtr &files)
 
     for (; first_file_it != files_.end(); ++first_file_it, ++row) {
         id_to_row_[first_file_it->get()->id()] = row;
+
+        if (!first_file_it->get()->isDir()) {
+            ++already_downloaded_files_;
+        } else {
+            qDebug() << "NO TO DUPA";
+        }
     }
 
     emit postItemAppended();
@@ -126,8 +144,8 @@ QVariant FileList::data(const IdType file_id, int role) {
         return 0;
     }
 
-    if (role == FileListModel::FileListRole::ItemCounterRole) {
-        return file->count();
+    if (role == FileListModel::FileListRole::AllItemsCounterRole) {
+        return file->countAllItems();
     }
 
     return {};
@@ -147,8 +165,14 @@ void FileList::setData(const IdType file_id, int role, QVariant value) {
         return ;
     }
 
-    if (role == FileListModel::FileListRole::ItemCounterRole) {
-        file->setCount(value.toInt());
+    if (role == FileListModel::FileListRole::ItemsCounterRole) {
+        file->setItemsCount(value.toInt());
+        emit dataChanged(row->second, {FileListModel::FileListRole::AllItemsCounterRole});
+
+        visible_data_changed = true;
+    } else if (role == FileListModel::FileListRole::FoldersCounterRole) {
+        file->setFoldersCount(value.toInt());
+        emit dataChanged(row->second, FileListModel::FileListRole::AllItemsCounterRole);
 
         visible_data_changed = true;
     }
@@ -157,17 +181,34 @@ void FileList::setData(const IdType file_id, int role, QVariant value) {
         emit dataChanged(row->second, role);
     }
 }
-
-unsigned int FileList::getAllFilesCounter() const {
+#include <QDebug>
+unsigned int FileList::countAllItems() const {
+    qDebug() << "getAllFilesCounter?";
     if (parent_) {
-        return parent_->count();
+        qDebug() << "getAllFilesCounter: " << parent_->countAllItems();
+        return parent_->countAllItems();
+    }
+
+    return 0;
+}
+
+unsigned int FileList::countItems() const {
+    if (parent_) {
+        return parent_->countItems();
     }
 
     return 0;
 }
 
 bool FileList::canFetchMore() const {
-    return size() < getAllFilesCounter();
+    qDebug() << "canFetchMore: already_downloaded_files_: " << already_downloaded_files_;
+    qDebug() << "canFetchMore: countItems(): " << countItems();
+    qDebug() << "canFetchMore: already_downloaded_files_ < countItems(): " << (already_downloaded_files_ < countItems());
+//    if (start_point < already_downloaded_files_) {
+//        return false;
+//    }
+
+    return already_downloaded_files_ < countItems();
 }
 
 void FileList::setParentFile(const FilePtr& parent) {
@@ -180,4 +221,19 @@ void FileList::setParentFile(const FilePtr& parent) {
 
 const FilePtr& FileList::parentFile() {
     return parent_;
+}
+#include <QDebug>
+void FileList::setItemsCount(int count) {
+    if (parent_ && count != parent_->countItems()) {
+       parent_->setItemsCount(count);
+       qDebug() << "setItemsCount: " << count;
+       emit countChanged(id());
+    }
+}
+void FileList::setFoldersCount(int count) {
+    if (parent_/* && count != parent_->foldersCount()*/) {
+       parent_->setFoldersCount(count);
+       qDebug() << "setFoldersCount: " << count;
+       //emit countChanged();
+    }
 }

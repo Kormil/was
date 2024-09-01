@@ -33,8 +33,10 @@ public:
         return true;
     }
 
-    void setCount(int count) override;
-    int count() const override;
+    void setItemsCount(int count) override;
+    void setFoldersCount(int count) override;
+    int countItems() const override;
+    int countAllItems() const override;
 
 signals:
     void idChanged();
@@ -47,7 +49,8 @@ private:
     QString name_;
     QString path_;
     QString cache_key_;
-    int count_;
+    int count_items_;
+    int count_folders_;
 
     bool has_thumbnail_ = false;
 };
