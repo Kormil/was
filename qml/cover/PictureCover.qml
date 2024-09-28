@@ -9,13 +9,13 @@ CoverBackground {
     id: cover
 
     SilicaFlickable {
-anchors.fill: cover
+        anchors.fill: cover
 
-    AnimatedImage {
-        parent_width: cover.width
-        parent_height: cover.height
-        x: 0
-        picture_source: cover.picture_source
-    }
+        AnimatedImage {
+            parent_width: cover.width
+            parent_height: cover.height
+            x: 0
+            picture_source: cover.picture_source
+        }
     }
 }

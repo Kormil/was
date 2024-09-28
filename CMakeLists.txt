@@ -45,6 +45,8 @@ set(KORPHO_SOURCES
     src/types/filelist.h
     src/types/filesmanager.cpp
     src/types/filesmanager.h
+    src/models/folderlistmodel.cpp
+    src/models/folderlistmodel.h
     src/models/filelistmodel.cpp
     src/models/filelistmodel.h
     src/models/showpicturemodel.cpp

@@ -58,6 +58,7 @@ signals:
     void postItemAppended();
     void dataChanged(int, int);
     void countChanged(int);
+    void loaded();
 
 private:
     unsigned int all_files_counter_ = 0;

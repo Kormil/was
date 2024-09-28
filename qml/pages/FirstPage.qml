@@ -2,15 +2,16 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 import Settings 1.0
-import FileListModel 1.0
+import FolderListModel 1.0
 import Controller 1.0
 
 import "../items"
 
 Page {
-    property bool logging: false;
-    property int id: 0;
+    property bool logging: false
+    property int id: 0
     property string dir_name: qsTr("Photos")
+    property bool ready: false
 
     id: page
 
@@ -18,12 +19,8 @@ Page {
         resetCoverPage()
     }
 
-    FileListModel {
-        id: foldersModel
-    }
-
-    FileListModel {
-        id: filesModel
+    FolderListModel {
+        id: folderListModel
     }
 
     Connections {
@@ -34,7 +31,9 @@ Page {
             loginLabel.visible = false
             logging = false
 
-            Controller.clear(foldersModel)
+            folderListModel.clear()
+            Controller.clear(folderListModel)
+
             Controller.getRootFolder()
 
             model_for_cover_id: 0
@@ -44,7 +43,9 @@ Page {
     Connections {
         target: Settings
         onApiSpaceChanged: {
-            Controller.clear(foldersModel)
+            folderListModel.clear()
+            Controller.clear(folderListModel)
+
             Controller.getRootFolder()
         }
     }
@@ -65,7 +66,6 @@ Page {
             loadingIndicator.running = true
             loadingIndicator.visible = true
             loginLabel.visible = false
-            foldersView.visible = false
             filesView.visible = false
         }
     }
@@ -74,26 +74,35 @@ Page {
         target: Controller
         onRootFolderIdLoaded: {
             page.id = folder_id
-            Controller.getFolders(page.id, foldersModel)
+            Controller.getFolderSize(page.id)
+
+            folderListModel.folder_id = page.id
         }
     }
 
     Connections {
-        target: Controller
+        target: folderListModel
         onFoldersLoaded: {
-            if (folder_id === page.id) {
-                Controller.getItemsInFolder(folder_id, filesModel)
+            if (ready) {
+                loadingIndicator.running = false
+                loadingIndicator.visible = false
+                filesView.visible = true
+            } else {
+                ready = true
             }
         }
     }
 
     Connections {
-        target: Controller
-        onItemsLoaded: {
-            loadingIndicator.running = false
-            loadingIndicator.visible = false
-            foldersView.visible = true
-            filesView.visible = true
+        target: folderListModel
+        onFilesLoaded: {
+            if (ready) {
+                loadingIndicator.running = false
+                loadingIndicator.visible = false
+                filesView.visible = true
+            } else {
+                ready = true
+            }
         }
     }
 
@@ -133,7 +142,7 @@ Page {
                 visible: !Controller.logged && logging === false
 
                 text: qsTr("Login")
-                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {foldersModel: foldersModel})
+                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
             }
 
             MenuItem {
@@ -160,62 +169,38 @@ Page {
             }
         }
 
-        Column {
+        SilicaListView {
+            id: filesView
+
+            model: folderListModel
+
             anchors.fill: parent
+
             spacing: 0
 
-            SilicaListView {
-                id: foldersView
+            header: PageHeader {
+                id: title
+                title: dir_name
+            }
 
-                model: foldersModel
-
-                width: parent.width
-                height: contentHeight
-
-                spacing: 0
-
-                header: PageHeader {
-                    id: title
-                    title: dir_name
-                }
-
-                delegate: DictionaryPictureItem {
-                    onClicked: {
-                        if (!Controller.logged) {
-                            pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {foldersModel: foldersModel})
-                        } else {
+            delegate: DictionaryPictureItem {
+                onClicked: {
+                    if (!Controller.logged) {
+                        pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
+                    } else {
+                        if (model.is_dir) {
                             changeFolderForCover(model.id)
                             pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
-                        }
-                    }
-                }
-
-                VerticalScrollDecorator {}
-            }
-
-            SilicaListView {
-                id: filesView
-
-                model: filesModel
-
-                width: parent.width
-                height: contentHeight
-
-                spacing: 0
-
-                delegate: DictionaryPictureItem {
-                    onClicked: {
-                        if (!Controller.logged) {
-                            pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"), {foldersModel: foldersModel})
                         } else {
-                            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: page.id, started_index: index})
+                            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: page.id, started_index: folderListModel.mapToFileListModel(index)})
                         }
                     }
                 }
-
-                VerticalScrollDecorator {}
             }
+
+            VerticalScrollDecorator {}
         }
+
 
         BusyIndicator {
             id: loadingIndicator

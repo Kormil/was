@@ -9,16 +9,12 @@ import "../items"
 CoverBackground {
     id: cover
 
-    property int download_id: 0;
-    property int current_index: 0;
-
-    onDownload_idChanged: {
-        Controller.getItemsInFolder(download_id, fileListModel)
-    }
-
+    property int download_id: 0
+    property int current_index: 0
 
     FileListModel {
         id: fileListModel
+        folder_id: download_id
     }
 
     Image {
@@ -94,7 +90,7 @@ CoverBackground {
             loops: Animation.Infinite
 
             PauseAnimation {
-                duration: 20000
+                duration: 25000
             }
 
             NumberAnimation {
@@ -106,7 +102,13 @@ CoverBackground {
 
             ScriptAction {
                 script: {
-                    current_index = Math.floor(Math.random() * listView.count)
+                    var index = Math.floor(Math.random() * listView.count)
+                    if (index !== current_index) {
+                        current_index = index
+                    } else {
+                        animation_show.start()
+                    }
+
                 }
             }
         }

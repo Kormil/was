@@ -15,8 +15,6 @@ Dialog {
         loginField.text = Settings.userLogin
     }
 
-    property FileListModel fileListModel
-
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 

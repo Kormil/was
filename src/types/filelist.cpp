@@ -85,10 +85,11 @@ void FileList::append(const FilePtr &file)
         emit postItemAppended();
     }
 }
-#include <QDebug>
+
 void FileList::appendList(const FileListPtr &files)
 {
     if (!files) {
+        emit loaded();
         return;
     }
 
@@ -104,6 +105,7 @@ void FileList::appendList(const FileListPtr &files)
     }
 
     if (temp_files_.empty()) {
+        emit loaded();
         return;
     }
 
@@ -117,12 +119,11 @@ void FileList::appendList(const FileListPtr &files)
 
         if (!first_file_it->get()->isDir()) {
             ++already_downloaded_files_;
-        } else {
-            qDebug() << "NO TO DUPA";
         }
     }
 
     emit postItemAppended();
+    emit loaded();
 }
 
 std::vector<IdType> FileList::getAllIds() const {
@@ -181,11 +182,9 @@ void FileList::setData(const IdType file_id, int role, QVariant value) {
         emit dataChanged(row->second, role);
     }
 }
-#include <QDebug>
+
 unsigned int FileList::countAllItems() const {
-    qDebug() << "getAllFilesCounter?";
     if (parent_) {
-        qDebug() << "getAllFilesCounter: " << parent_->countAllItems();
         return parent_->countAllItems();
     }
 
@@ -193,22 +192,11 @@ unsigned int FileList::countAllItems() const {
 }
 
 unsigned int FileList::countItems() const {
-    if (parent_) {
-        return parent_->countItems();
-    }
-
-    return 0;
+    return all_files_counter_;
 }
 
 bool FileList::canFetchMore() const {
-    qDebug() << "canFetchMore: already_downloaded_files_: " << already_downloaded_files_;
-    qDebug() << "canFetchMore: countItems(): " << countItems();
-    qDebug() << "canFetchMore: already_downloaded_files_ < countItems(): " << (already_downloaded_files_ < countItems());
-//    if (start_point < already_downloaded_files_) {
-//        return false;
-//    }
-
-    return already_downloaded_files_ < countItems();
+    return already_downloaded_files_ < all_files_counter_;
 }
 
 void FileList::setParentFile(const FilePtr& parent) {
@@ -222,18 +210,14 @@ void FileList::setParentFile(const FilePtr& parent) {
 const FilePtr& FileList::parentFile() {
     return parent_;
 }
-#include <QDebug>
+
 void FileList::setItemsCount(int count) {
-    if (parent_ && count != parent_->countItems()) {
-       parent_->setItemsCount(count);
-       qDebug() << "setItemsCount: " << count;
-       emit countChanged(id());
-    }
+    all_files_counter_ = count;
+    emit countChanged(id());
 }
+
 void FileList::setFoldersCount(int count) {
-    if (parent_/* && count != parent_->foldersCount()*/) {
+    if (parent_) {
        parent_->setFoldersCount(count);
-       qDebug() << "setFoldersCount: " << count;
-       //emit countChanged();
     }
 }

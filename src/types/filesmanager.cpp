@@ -76,10 +76,32 @@ void FilesManager::getItemsCounter(const FileListPtr &files) {
     }
 }
 
+void FilesManager::getFolderSize(IdType folder_id) {
+    auto space = Settings::instance()->apiSpace();
+
+    auto leaf_index = findLeaf(folder_id);
+
+    // items
+    auto count_items_request = std::make_shared<CountItemsRequest>(folder_id, space, [this, leaf_index](int, int count) {
+        file_lists_[leaf_index].items->setItemsCount(count);
+    });
+
+    auto count_items_serial = connection_->addRequest(count_items_request);
+    connection_->runRequest(count_items_serial);
+
+    // folders
+    auto count_folders_request = std::make_shared<CountFoldersRequest>(folder_id, space, [this, leaf_index](int, int count) {
+        file_lists_[leaf_index].folders->setItemsCount(count);
+    });
+
+    auto count_folders_serial = connection_->addRequest(count_folders_request);
+    connection_->runRequest(count_folders_serial);
+}
+
 void FilesManager::cleanCurrentStack(int index)
 {
     // it is last item
-    if (index == file_lists_.size() - 1) {
+    if (index < 0 || index == file_lists_.size() - 1) {
         return;
     }
 
@@ -87,120 +109,46 @@ void FilesManager::cleanCurrentStack(int index)
     --file_lists_iterator_;
 }
 
-void FilesManager::getItems(IdType folder_id, std::function<void(const FileListPtr &files)> handler) {
+FileListPtr FilesManager::getItems(IdType folder_id) {
     std::lock_guard lock{file_list_iterator_mutex_};
 
     // Search where put images
-    qDebug() << "REQUEST IMAGES FOR: " << folder_id;
     auto index = findLeaf(folder_id);
 
     // Do we have everything already?
     if (file_lists_[index].items && !file_lists_[index].items->canFetchMore()) {
-        return handler(file_lists_[index].items);
+        return file_lists_[index].items;
     }
 
     // Let's get more
-    return fetchMoreItems(folder_id, 0, handler);
-}
-
-void FilesManager::getFolders(IdType id, std::function<void(const FileListPtr &files)> handler) {
-    std::lock_guard lock{file_list_iterator_mutex_};
-
-    {
-        std::lock_guard lock{get_folders_mtx_};
-        auto found = get_folders_handlers_.find(id);
-        bool return_after_insert = found != get_folders_handlers_.end();
-
-        get_folders_handlers_.insert({id, handler});
-
-        if (return_after_insert) {
-            return;
-        }
-    }
-
     auto space = Settings::instance()->apiSpace();
-    auto get_folders_handler = [this, id](const FileListPtr &files) {
-        auto all_files = appendOrInsertToFolders(id, files);
-
-        {
-            std::lock_guard lock{get_folders_mtx_};
-            auto range = get_folders_handlers_.equal_range(id);
-            for (auto handler = range.first; handler != range.second; ++handler) {
-                handler->second(all_files);
-            }
-            get_folders_handlers_.erase(id);
-        }
-    };
-
-    auto request = std::make_shared<GetFoldersRequest>(id, space, get_folders_handler);
-
-
-    auto serial = connection_->addRequest(request);
-    connection_->runRequest(serial);
-}
-
-void FilesManager::getRootFolder(GetRootFoldersHandlerType handler) {
-//    std::lock_guard lock{file_list_iterator_mutex_};
-
-//    {
-//        std::lock_guard lock{get_folders_mtx_};
-//        bool return_after_insert = !get_root_folder_handlers_.empty();
-
-//        get_root_folder_handlers_.push_back(handler);
-
-//        if (return_after_insert) {
-//            return;
-//        }
-//    }
-
-//    auto space = Settings::instance()->apiSpace();
-//    auto get_folders_handler = [this](int downloaded_folder_id, const FileListPtr &files) {
-//        auto all_files = appendOrInsertToFolders(downloaded_folder_id, files);
-
-//        {
-//            std::lock_guard lock{get_folders_mtx_};
-//            for (auto &handler : get_root_folder_handlers_) {
-//                handler(downloaded_folder_id, all_files);
-//            }
-//            get_root_folder_handlers_.clear();
-//        }
-//    };
-
-//    auto request = std::make_shared<GetRootFoldersRequest>(space, get_folders_handler);
-
-//    auto serial = connection_->addRequest(request);
-//    connection_->runRequest(serial);
-}
-
-void FilesManager::fetchMoreItems(IdType id, unsigned int start_point, GetItemsHandlerType handler) {
-    {
-        std::lock_guard lock{get_items_mtx_};
-        auto search = get_items_handlers_.find(id);
-        bool return_after_insert = search != get_items_handlers_.end();
-
-        get_items_handlers_.insert({id, handler});
-
-        if (return_after_insert) {
-            return;
-        }
-    }
-
-    auto space = Settings::instance()->apiSpace();
-    auto request = std::make_shared<GetItemsRequest>(id, start_point, space, [this, id](const FileListPtr &files) {
-        auto all_files = appendOrInsertToItems(id, files);
-
-        {
-            std::lock_guard lock{get_items_mtx_};
-            auto range = get_items_handlers_.equal_range(id);
-            for (auto handler = range.first; handler != range.second; ++handler) {
-                handler->second(all_files);
-            }
-            get_items_handlers_.erase(id);
-        }
+    auto request = std::make_shared<GetItemsRequest>(folder_id, file_lists_[index].items->size(), space, [this, folder_id](const FileListPtr &files) {
+        auto all_files = appendOrInsertToItems(folder_id, files);
     });
 
     auto serial = connection_->addRequest(request);
     connection_->runRequest(serial);
+
+    return file_lists_[index].items;
+}
+
+FileListPtr FilesManager::getFolders(IdType folder_id) {
+    std::lock_guard lock{file_list_iterator_mutex_};
+
+    auto index = findLeaf(folder_id);
+
+    auto space = Settings::instance()->apiSpace();
+    auto get_folders_handler = [this, folder_id](const FileListPtr &files) {
+        auto all_files = appendOrInsertToFolders(folder_id, files);
+        getItemsCounter(all_files);
+    };
+
+    auto request = std::make_shared<GetFoldersRequest>(folder_id, space, get_folders_handler);
+
+    auto serial = connection_->addRequest(request);
+    connection_->runRequest(serial);
+
+    return file_lists_[index].folders;
 }
 
 FilePtr FilesManager::getFile(IdType file_id) {
@@ -224,14 +172,25 @@ FilePtr FilesManager::getFile(IdType file_id) {
 }
 
 int FilesManager::findLeaf(int folder_id) {
+    std::lock_guard lock{find_leaf_mutex_};
+
     for (std::size_t i = 0; i < file_lists_.size(); ++i) {
         if (file_lists_[i].id == folder_id) {
             return i;
         }
     }
 
+    auto parent_index = findParentLeaf(folder_id);
+    cleanCurrentStack(parent_index);
+
     Leaf l;
     l.id = folder_id;
+
+    l.items = std::make_shared<FileList>();
+    l.items->setId(folder_id);
+
+    l.folders = std::make_shared<FileList>();
+    l.folders->setId(folder_id);
 
     int index = file_lists_.size();
     file_lists_.push_back(l);
@@ -263,7 +222,6 @@ FileListPtr FilesManager::appendOrInsertToItems(int folder_id, const FileListPtr
     }
 
     auto index = findLeaf(folder_id);
-    //assert(("No exists leaf for folder: " + folder_id, file_lists_[index].parent_index == -1));
 
     auto& list = file_lists_[index].items;
     if (list) {
@@ -286,8 +244,6 @@ FileListPtr FilesManager::appendOrInsertToFolders(int folder_id, const FileListP
     }
 
     auto parent_index = findParentLeaf(folder_id);
-    //assert(("No exists parent for folder: " + folder_id, parent_index == -1));
-    cleanCurrentStack(parent_index);
 
     auto index = findLeaf(folder_id);
 

@@ -2,13 +2,14 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 import Settings 1.0
-import FileListModel 1.0
+import FolderListModel 1.0
 import Controller 1.0
 
 import "../items"
 
 Page {
-    property int download_id: 0;
+    property bool ready: false
+    property int download_id: 0
     property string dir_name: qsTr("Photos")
 
     id: page
@@ -17,45 +18,50 @@ Page {
         resetCoverPage()
     }
 
-    FileListModel {
-        id: foldersModel
-    }
-
-    FileListModel {
-        id: filesModel
+    FolderListModel {
+        id: folderListModel
+        folder_id: download_id
     }
 
     Connections {
-        target: Controller
-        onFoldersLoading: {
-            loadingIndicator.running = true
-            loadingIndicator.visible = true
-            foldersView.visible = false
-            filesView.visible = false
-        }
-    }
-
-    Connections {
-        target: Controller
-        onFoldersLoaded: {
-            if (page.download_id === folder_id) {
-                Controller.getItemsInFolder(page.download_id, filesModel)
+        target: folderListModel
+        onFilesLoading: {
+            if (!ready) {
+                loadingIndicator.running = true
+                loadingIndicator.visible = true
+                filesView.visible = false
             }
         }
     }
 
     Connections {
-        target: Controller
-        onItemsLoaded: {
-            loadingIndicator.running = false
-            loadingIndicator.visible = false
-            foldersView.visible = true
-            filesView.visible = true
+        target: folderListModel
+        onFoldersLoaded: {
+            if (ready) {
+                loadingIndicator.running = false
+                loadingIndicator.visible = false
+                filesView.visible = true
+            } else {
+                ready = true
+            }
+        }
+    }
+
+    Connections {
+        target: folderListModel
+        onFilesLoaded: {
+            if (ready) {
+                loadingIndicator.running = false
+                loadingIndicator.visible = false
+                filesView.visible = true
+            } else {
+                ready = true
+            }
         }
     }
 
     Component.onCompleted: {
-        Controller.getFolders(page.download_id, foldersModel)
+        Controller.getFolderSize(download_id)
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -65,18 +71,12 @@ Page {
     SilicaFlickable {
         anchors.fill: parent
 
-        Column {
-            anchors.fill: parent
-            spacing: 0
-
             SilicaListView {
-                id: foldersView
+                id: filesView
 
-                model: foldersModel
+                model: folderListModel
 
-                width: parent.width
-                height: contentHeight
-
+                anchors.fill: parent
                 spacing: 0
 
                 header: PageHeader {
@@ -86,33 +86,17 @@ Page {
 
                 delegate: DictionaryPictureItem {
                     onClicked: {
-                        changeFolderForCover(model.id)
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
+                        if (model.is_dir) {
+                            changeFolderForCover(model.id)
+                            pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
+                        } else {
+                            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: folderListModel.mapToFileListModel(index)})
+                        }
                     }
                 }
 
                 VerticalScrollDecorator {}
             }
-
-            SilicaListView {
-                id: filesView
-
-                model: filesModel
-
-                width: parent.width
-                height: contentHeight
-
-                spacing: 0
-
-                delegate: DictionaryPictureItem {
-                    onClicked: {
-                        pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: download_id, started_index: index})
-                    }
-                }
-
-                VerticalScrollDecorator {}
-            }
-        }
 
         BusyIndicator {
             id: loadingIndicator

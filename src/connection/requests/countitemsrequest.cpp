@@ -11,7 +11,7 @@ CountItemsRequest::CountItemsRequest(IdType id, Request::Space space, HandlerTyp
         api_ = "entry.cgi?api=SYNO.FotoTeam.Browse.Item";
     }
 
-    parameters_ = QString("version=1&method=count&folder_id=%1&additional=[%22thumbnail%22]").arg(id);
+    parameters_ = QString("version=1&method=count&folder_id=%1").arg(id);
 
     QObject::connect(this, &Request::ready, [this, id, handler](Request::Status status, const QByteArray& responseArray) {
         if (status == Request::ERROR) {

@@ -112,12 +112,6 @@ void FileListModel::setList(const FileListPtr &files)
         });
 
         connect(items_.get(), &FileList::countChanged, this, [this](int id) {
-            qDebug() << "countChanged: " << id << " : " << items_->index(id);
-
-
-//            auto index = createIndex(items_->index(id), 0);
-//            emit dataChanged(index, index, {AllItemsCounterRole});
-
             if (canFetchMore(QModelIndex())) {
                 fetchMore(QModelIndex());
             }
@@ -139,11 +133,23 @@ bool FileListModel::canFetchMore(const QModelIndex &parent) const
 
 void FileListModel::fetchMore(const QModelIndex &parent)
 {
-//    if (parent.isValid() || !items_) {
-//        return;
-//    }
+    if (parent.isValid() || !items_) {
+        return;
+    }
 
-//    auto& controller = Controller::instance();
-//    controller.getItemsInFolder(items_->id());
+    auto& controller = Controller::instance();
+    controller.getItemsInFolder(items_->id());
 }
 
+int FileListModel::folderId()  const {
+    return folder_id_;
+}
+
+void FileListModel::setFolderId(int id) {
+    folder_id_ = id;
+
+    auto& controller = Controller::instance();
+    const auto files = controller.getItemsInFolder(folder_id_);
+
+    setList(files);
+}

@@ -3,6 +3,7 @@
 
 #include "src/models/filelistmodel.h"
 #include "src/models/showpicturemodel.h"
+#include "src/models/folderlistmodel.h"
 #include "src/settings.h"
 #include "src/connection/requests/loginrequest.h"
 #include "src/connection/requests/logoutrequest.h"
@@ -43,6 +44,10 @@ void Controller::bindToQml()
     qRegisterMetaType<ShowPictureModel*>();
     qmlRegisterType<ShowPictureModel>("ShowPictureModel", 1, 0, "ShowPictureModel");
 
+    qRegisterMetaType<FolderListModel*>();
+    qmlRegisterType<FolderListModel>("FolderListModel", 1, 0, "FolderListModel");
+
+
     //qmlRegisterType<Dir>("Dir", 1, 0, "Dir");
 }
 
@@ -70,12 +75,7 @@ bool Controller::getLoginResult() {
 }
 
 void Controller::clear(FileListModel* file_list_model) {
-   // emit itemsLoading();
-
-    file_list_model->clear();
     files_manager_->clear();
-
-    //emit itemsLoaded();
 }
 
 void Controller::getRootFolder() {
@@ -91,25 +91,16 @@ void Controller::getRootFolder() {
     connection_->runRequest(serial);
 }
 
-void Controller::getFolders(int id, FileListModel* file_list_model) {
-    emit foldersLoading();
-
-    files_manager_->getFolders(id, [=](const FileListPtr& folders) {
-        files_manager_->getItemsCounterForParent(folders);
-        files_manager_->getItemsCounter(folders);
-
-        file_list_model->setList(folders);
-        emit foldersLoaded(folders->id());
-    });
+void Controller::getFolderSize(int id) {
+    files_manager_->getFolderSize(id);
 }
 
-void Controller::getItemsInFolder(int id, FileListModel* file_list_model) {
-    emit itemsLoading();
+FileListPtr Controller::getFolders(IdType id) {
+    return files_manager_->getFolders(id);
+}
 
-    files_manager_->getItems(id, [=](const FileListPtr& files) {
-        file_list_model->setList(files);
-        emit itemsLoaded(files->id());
-    });
+FileListPtr Controller::getItemsInFolder(IdType id) {
+    return files_manager_->getItems(id);
 }
 
 void Controller::getThumbnail(const IdType &id, const QString &cacheKey, const QString &type) {

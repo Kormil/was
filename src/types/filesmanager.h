@@ -34,14 +34,16 @@ public:
 
     void pop();
 
-    void getItems(IdType folder_id, GetItemsHandlerType handler);
-    void getFolders(IdType id, GetFoldersHandlerType handler);
+    FileListPtr getItems(IdType folder_id);
+    FileListPtr getFolders(IdType folder_id);
     void getRootFolder(GetRootFoldersHandlerType handler);
 
     FilePtr getFile(IdType file_id);
 
     void getItemsCounterForParent(const FileListPtr &file);
     void getItemsCounter(const FileListPtr &files);
+
+    void getFolderSize(IdType folder_id);
 
     void clear();
 
@@ -52,9 +54,8 @@ private:
     FileListPtr appendOrInsertToFolders(int folder_id, const FileListPtr &files);
     FileListPtr appendOrInsertToItems(int folder_id, const FileListPtr &files);
 
-    void fetchMoreItems(IdType id, unsigned int start_point, GetItemsHandlerType handler);
-
     std::mutex file_list_iterator_mutex_;
+    std::mutex find_leaf_mutex_;
 
     ConnectionPtr connection_;
 

@@ -15,16 +15,13 @@ Page {
 
     id: page
 
-    ShowPictureModel {
-        id: fileListModel
+    Component.onCompleted: {
+        changeCoverPage(picture_cover_component)
     }
 
-    Component.onCompleted: {
-        if (page.download_id !== 0) {
-            Controller.getItemsInFolder(page.download_id, fileListModel)
-        }
-
-        changeCoverPage(picture_cover_component)
+    ShowPictureModel {
+        id: fileListModel
+        folder_id: download_id
     }
 
     onStatusChanged: {
