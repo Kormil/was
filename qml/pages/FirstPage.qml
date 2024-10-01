@@ -154,7 +154,7 @@ Page {
 
             MenuItem {
                 visible: Settings.api_space === 0 && Controller.logged && logging === false
-                text: qsTr("Change to shared space")
+                text: qsTr("Shared space")
                 onClicked: {
                     Settings.api_space = 1
                 }
@@ -162,7 +162,7 @@ Page {
 
             MenuItem {
                 visible: Settings.api_space === 1 && Controller.logged && logging === false
-                text: qsTr("Change to personal space")
+                text: qsTr("Personal space")
                 onClicked: {
                     Settings.api_space = 0
                 }
@@ -180,7 +180,7 @@ Page {
 
             header: PageHeader {
                 id: title
-                title: dir_name
+                title: Settings.api_space === 0 ? qsTr("Personal space") : qsTr("Shared space")
             }
 
             delegate: DictionaryPictureItem {

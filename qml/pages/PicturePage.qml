@@ -15,6 +15,8 @@ Page {
 
     id: page
 
+    allowedOrientations: Orientation.All
+
     Component.onCompleted: {
         changeCoverPage(picture_cover_component)
     }
