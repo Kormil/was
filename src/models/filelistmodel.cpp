@@ -119,7 +119,6 @@ void FileListModel::setList(const FileListPtr &files)
     }
 
     endResetModel();
-    emit filesLoaded();
 }
 
 bool FileListModel::canFetchMore(const QModelIndex &parent) const
@@ -128,7 +127,12 @@ bool FileListModel::canFetchMore(const QModelIndex &parent) const
         return false;
     }
 
-    return items_->canFetchMore();
+    const bool can_fetch_more = items_->canFetchMore();
+    if (!can_fetch_more) {
+        emit filesLoaded();
+    }
+
+    return can_fetch_more;
 }
 
 void FileListModel::fetchMore(const QModelIndex &parent)

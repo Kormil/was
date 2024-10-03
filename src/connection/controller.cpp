@@ -61,7 +61,7 @@ void Controller::login(const QString &quickconnect, const QString &login, const 
         loginResult = result;
 
         emit loginStatusChanged();
-        emit loginCompleted();
+        emit loginCompleted(result);
     };
 
     auto request = std::make_shared<LoginRequest>(quickconnect, login, password, handler);

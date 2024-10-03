@@ -191,7 +191,7 @@ void FolderListModel::setFolders(const FileListPtr &files)
     }
 
     endResetModel();
-    emit filesLoaded();
+    emit foldersLoaded();
 }
 
 bool FolderListModel::canFetchMore(const QModelIndex &parent) const

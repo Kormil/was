@@ -42,7 +42,7 @@ public slots:
 
 signals:
     void loginStarted();
-    void loginCompleted();
+    void loginCompleted(bool status);
     void loginStatusChanged();
 
     void rootFolderIdLoading();

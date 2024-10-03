@@ -25,11 +25,23 @@ Page {
 
     Connections {
         target: Controller
+        onLoginStarted: {
+            loadingIndicator.running = true
+            loadingIndicator.visible = true
+            loginLabel.visible = true
+            logging = true
+        }
+    }
+
+    Connections {
+        target: Controller
         onLoginCompleted: {
-            loadingIndicator.running = false
-            loadingIndicator.visible = false
-            loginLabel.visible = false
-            logging = false
+            if (status) {
+                loadingIndicator.running = false
+                loadingIndicator.visible = false
+                loginLabel.visible = false
+                logging = false
+            }
 
             folderListModel.clear()
             Controller.clear(folderListModel)
@@ -47,16 +59,6 @@ Page {
             Controller.clear(folderListModel)
 
             Controller.getRootFolder()
-        }
-    }
-
-    Connections {
-        target: Controller
-        onLoginStarted: {
-            loadingIndicator.running = true
-            loadingIndicator.visible = true
-            loginLabel.visible = true
-            logging = true
         }
     }
 
@@ -174,8 +176,8 @@ Page {
 
             model: folderListModel
 
+            visible: false
             anchors.fill: parent
-
             spacing: 0
 
             header: PageHeader {

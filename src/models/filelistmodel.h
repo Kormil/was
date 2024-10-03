@@ -55,7 +55,7 @@ protected:
     void fetchMore(const QModelIndex &parent) override;
 
 signals:
-    void filesLoaded();
+    void filesLoaded() const;
     void folderIdChanged();
 
 private:
