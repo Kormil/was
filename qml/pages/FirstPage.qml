@@ -141,17 +141,24 @@ Page {
             }
 
             MenuItem {
-                visible: !Controller.logged && logging === false
-
-                text: qsTr("Login")
-                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
-            }
-
-            MenuItem {
                 visible: Controller.logged && logging === false
 
                 text: qsTr("Logout")
                 onClicked: Controller.logout()
+            }
+
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+                }
+            }
+
+            MenuItem {
+                visible: !Controller.logged && logging === false
+
+                text: qsTr("Login")
+                onClicked: pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
             }
 
             MenuItem {

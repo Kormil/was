@@ -151,7 +151,6 @@ void FolderListModel::setFiles(const FileListPtr &files)
     }
 
     endResetModel();
-    emit filesLoaded();
 }
 
 void FolderListModel::setFolders(const FileListPtr &files)

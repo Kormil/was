@@ -67,6 +67,7 @@ set(KORPHO_QML_SOURCES
     qml/pages/AboutPage.qml
     qml/pages/LicensePage.qml
     qml/pages/PicturePage.qml
+    qml/pages/SettingsPage.qml
     qml/dialogs/LoginDialog.qml
     qml/dialogs/SaveLoginDataDialog.qml
     qml/dialogs/AutoLoginOnStartDialog.qml
