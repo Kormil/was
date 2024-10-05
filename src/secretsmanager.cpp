@@ -1,8 +1,6 @@
 #include "secretsmanager.h"
 
-#include <QObject>
-#include <QtQml>
-#include <QVariant>
+#include <QDebug>
 #include <sailfishapp.h>
 
 SecretsManager::SecretsManager() {
@@ -15,7 +13,7 @@ unsigned int SecretsManager::addRequest(SecretRequestPtr request) {
     return serial;
 }
 
-void SecretsManager::isCollectionExistsInSecretsManager(std::function<void(void)> handler) {
+void SecretsManager::isCollectionExistsInSecretsManager(const std::function<void(void)> &handler) {
     auto request_ptr = std::make_shared<Sailfish::Secrets::CollectionNamesRequest>();
     request_ptr->setManager(&secrets_manager_);
     request_ptr->setStoragePluginName(Sailfish::Secrets::SecretManager::DefaultEncryptedStoragePluginName);
@@ -44,18 +42,18 @@ void SecretsManager::isCollectionExistsInSecretsManager(std::function<void(void)
         }
 
         auto cnr = static_cast<Sailfish::Secrets::CollectionNamesRequest *>(request.get());
-        if (cnr->collectionNames().contains(COLLECTION_NAME)) {
-            collection_exists_ = true;
-            return handler();
-        } else {
+        if (!cnr->collectionNames().contains(COLLECTION_NAME)) {
             createSecretsCollection(handler);
+        } else {
+            collection_exists_ = true;
+            handler();
         }
     });
 
     request_raw_ptr->startRequest();
 }
 
-void SecretsManager::createSecretsCollection(std::function<void(void)> handler) {
+void SecretsManager::createSecretsCollection(const std::function<void(void)> &handler) {
     auto request_ptr = std::make_shared<Sailfish::Secrets::CreateCollectionRequest>();
     request_ptr->setManager(&secrets_manager_);
     request_ptr->setCollectionName(COLLECTION_NAME);
@@ -150,7 +148,7 @@ void SecretsManager::saveToSecretsManager(const QString& name, const QString& va
      request_raw_ptr->startRequest();
 }
 
-void SecretsManager::readFromSecretsManager(const QString& name, std::function<void(QString)> handler) {
+void SecretsManager::readFromSecretsManager(const QString& name, const std::function<void(QString)> &handler) {
     if (!collection_exists_) {
         return handler("");
     }
@@ -205,7 +203,7 @@ void SecretsManager::readFromSecretsManager(const QString& name, std::function<v
     request_raw_ptr->startRequest();
 }
 
-void SecretsManager::deleteFromSecretsManager(const QString& name, std::function<void(bool)> handler) {
+void SecretsManager::deleteFromSecretsManager(const QString& name, const std::function<void(bool)> &handler) {
     if (!collection_exists_) {
         return handler("");
     }

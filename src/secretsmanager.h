@@ -21,11 +21,11 @@ public:
 
     explicit SecretsManager();
     
-    void isCollectionExistsInSecretsManager(std::function<void(void)> handler);
-    void createSecretsCollection(std::function<void(void)> handler);
+    void isCollectionExistsInSecretsManager(const std::function<void ()> &handler);
+    void createSecretsCollection(const std::function<void ()> &handler);
     void saveToSecretsManager(const QString& name, const QString& value);
-    void readFromSecretsManager(const QString& name, std::function<void (QString)> handler);
-    void deleteFromSecretsManager(const QString& name, std::function<void(bool)> handler);
+    void readFromSecretsManager(const QString& name, const std::function<void (QString)> &handler);
+    void deleteFromSecretsManager(const QString& name, const std::function<void (bool)> &handler);
     
 private:
     Sailfish::Secrets::SecretManager secrets_manager_;
