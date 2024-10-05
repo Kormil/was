@@ -36,7 +36,7 @@ Page {
         id: background
 
         anchors.fill: parent
-        color: "black";
+        color: Theme.colorScheme == Theme.LightOnDark ? "black" : "white"
     }
 
 
