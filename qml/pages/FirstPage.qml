@@ -198,10 +198,9 @@ Page {
                         pageStack.animatorPush(Qt.resolvedUrl("../dialogs/LoginDialog.qml"))
                     } else {
                         if (model.is_dir) {
-                            changeFolderForCover(model.id)
-                            pageStack.animatorPush(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
+                            pageStack.push(Qt.resolvedUrl("../pages/SecondPage.qml"), {download_id: model.id, dir_name: model.name})
                         } else {
-                            pageStack.animatorPush(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: page.id, started_index: folderListModel.mapToFileListModel(index)})
+                            pageStack.push(Qt.resolvedUrl("../pages/PicturePage.qml"), {download_id: page.id, started_index: folderListModel.mapToFileListModel(index)})
                         }
                     }
                 }
