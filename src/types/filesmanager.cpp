@@ -236,19 +236,15 @@ FileListPtr FilesManager::appendOrInsertToItems(int folder_id, const FileListPtr
 FileListPtr FilesManager::appendOrInsertToFolders(int folder_id, const FileListPtr &files) {
     std::lock_guard lock{file_list_iterator_mutex_};
 
-
     // new items
     const auto &parent = getFile(folder_id);
     if (parent) {
         files->setParentFile(parent);
     }
 
-    auto parent_index = findParentLeaf(folder_id);
-
     auto index = findLeaf(folder_id);
 
     file_lists_[index].index = index;
-    file_lists_[index].parent_index = parent_index;
 
     auto& list = file_lists_[index].folders;
     if (list) {

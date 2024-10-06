@@ -20,8 +20,8 @@ Page {
             }
 
             TextSwitch {
-                id: alwaysLargeImagesTextSwitch
-                text: qsTr("Login it at startup")
+                id: loginAtStartupTextSwitch
+                text: qsTr("Log in at startup")
                 checked: Settings.autologin
 
                 onCheckedChanged: {

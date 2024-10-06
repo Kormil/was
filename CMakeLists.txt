@@ -1,7 +1,7 @@
 project(harbour-was CXX)
 cmake_minimum_required(VERSION 3.5)
 
-find_package (Qt5 COMPONENTS Core Network Qml Gui Quick REQUIRED)
+find_package (Qt5 COMPONENTS Core Network Qml Gui Quick LinguistTools REQUIRED)
 
 include(FindPkgConfig)
 pkg_search_module(SAILFISH sailfishapp REQUIRED)
@@ -12,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(KORPHO_SOURCES
+set(WAS_SOURCES
     src/connection/connection.cpp
     src/connection/connection.h
     src/connection/controller.cpp
@@ -77,7 +77,7 @@ set(KORPHO_QML_SOURCES
 
 qt5_add_resources(graphics.qrc)
 
-add_executable(harbour-was ${KORPHO_SOURCES} ${KORPHO_QML_SOURCES} graphics.qrc)
+add_executable(harbour-was ${WAS_SOURCES} ${KORPHO_QML_SOURCES} graphics.qrc)
 target_compile_definitions(harbour-was PRIVATE
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
 )
@@ -123,16 +123,20 @@ install(FILES LICENSE
 
 # Get the other files reachable from the project tree in Qt Creator
 FILE(GLOB TsFiles "translations/*.ts")
+FILE(GLOB QM_FILES "translations/*.qm")
+
 add_custom_target(distfiles
     SOURCES
         harbour-was.desktop
         ${KORPHO_QML_SOURCES}
         rpm/harbour-was.changes.in
-        rpm/harbour-was.changes.run.in
+        rpm/harbour-was.changes.run.sin
         rpm/harbour-was.spec
         rpm/harbour-was.yaml
         graphics.qrc
         LICENSE
+        translations/harbour-was.ts
+        ${QM_FILES}
         ${TsFiles})
 
 # Tell Qt Creator where the application executable(s) would be located on the

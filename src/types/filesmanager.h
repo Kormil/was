@@ -17,7 +17,6 @@ class FilesManager {
         IdType id;
 
         int index = -1;
-        int parent_index= -1;
 
         FileListPtr items;
         FileListPtr folders;

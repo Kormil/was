@@ -19,7 +19,7 @@ class SecretsManager
 public:
     using SecretRequestPtr = std::shared_ptr<Sailfish::Secrets::Request>;
 
-    explicit SecretsManager();
+    explicit SecretsManager() = default;
     
     void isCollectionExistsInSecretsManager(const std::function<void ()> &handler);
     void createSecretsCollection(const std::function<void ()> &handler);

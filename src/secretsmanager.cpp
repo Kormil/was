@@ -3,9 +3,6 @@
 #include <QDebug>
 #include <sailfishapp.h>
 
-SecretsManager::SecretsManager() {
-}
-
 unsigned int SecretsManager::addRequest(SecretRequestPtr request) {
     auto serial = serial_.fetch_add(1, std::memory_order_relaxed);
 
@@ -18,7 +15,7 @@ void SecretsManager::isCollectionExistsInSecretsManager(const std::function<void
     request_ptr->setManager(&secrets_manager_);
     request_ptr->setStoragePluginName(Sailfish::Secrets::SecretManager::DefaultEncryptedStoragePluginName);
 
-    auto request_raw_ptr = request_ptr.get();
+    auto* request_raw_ptr = request_ptr.get();
     auto serial = addRequest(std::move(request_ptr));
 
     QObject::connect(request_raw_ptr, &Sailfish::Secrets::CollectionNamesRequest::collectionNamesChanged, [serial, handler, this]() {
@@ -41,7 +38,7 @@ void SecretsManager::isCollectionExistsInSecretsManager(const std::function<void
             return;
         }
 
-        auto cnr = static_cast<Sailfish::Secrets::CollectionNamesRequest *>(request.get());
+        auto* cnr = static_cast<Sailfish::Secrets::CollectionNamesRequest *>(request.get());
         if (!cnr->collectionNames().contains(COLLECTION_NAME)) {
             createSecretsCollection(handler);
         } else {
@@ -237,7 +234,7 @@ void SecretsManager::deleteFromSecretsManager(const QString& name, const std::fu
 
         auto dsr = static_cast<Sailfish::Secrets::DeleteSecretRequest *>(request.get());
 
-        if (!dsr) {
+        if (dsr == nullptr) {
             qWarning() << "Badcast DeleteSecretRequest: " << serial;
             return handler(false);
         }

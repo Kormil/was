@@ -1,7 +1,7 @@
 Name:       harbour-was
 
 Summary:    The unofficial application for Synology Photos on SailfishOS
-Version:    0.1
+Version:    1.0
 Release:    1
 License:    LICENSE
 URL:        https://github.com/Kormil/was
