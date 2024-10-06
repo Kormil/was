@@ -15,7 +15,10 @@ Page {
     id: page
 
     onActiveFocusChanged: {
-        resetCoverPage()
+        if (activeFocus) {
+            resetCoverPage()
+            changeFolderForCover(download_id)
+        }
     }
 
     FolderListModel {

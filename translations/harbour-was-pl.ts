@@ -25,7 +25,7 @@
     </message>
     <message>
         <source>This app is unoffical and not affiliated with Synology Inc. No copyright infringement intended.</source>
-        <translation>Ta aplikacja jest nieoficjalna i nie jest powiązana z Synology Inc. Jakiekolwiek naruszenie jest niezamierzone.</translation>
+        <translation>To nieoficjalna aplikcja niepowiązana z Synology.Inc. Jakiekolwiek naruszenie praw jest niezamierzone.</translation>
     </message>
     <message>
         <source>App license</source>

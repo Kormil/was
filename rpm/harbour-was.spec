@@ -23,7 +23,6 @@ BuildRequires:  desktop-file-utils
 BuildRequires:  cmake
 
 %description
-Short description of my Sailfish OS Application
 
 
 %prep
