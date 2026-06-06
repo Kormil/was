@@ -10,9 +10,6 @@ FileList::FileList(QObject *qboject) :
 {
 }
 
-FileList::~FileList() {
-}
-
 IdType FileList::id() const {
     return id_;
 }

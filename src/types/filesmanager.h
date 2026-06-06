@@ -54,7 +54,6 @@ private:
     FileListPtr appendOrInsertToItems(int folder_id, const FileListPtr &files);
 
     std::mutex file_list_iterator_mutex_;
-    std::mutex find_leaf_mutex_;
 
     ConnectionPtr connection_;
 
@@ -64,7 +63,7 @@ private:
     std::multimap<IdType, GetFoldersHandlerType> get_folders_handlers_;
     std::multimap<IdType, GetItemsHandlerType> get_items_handlers_;
 
-    std::vector<Leaf>::iterator file_lists_iterator_;
+    int file_lists_index_ = 0;
     std::vector<Leaf> file_lists_;
 
     void cleanCurrentStack(int index);

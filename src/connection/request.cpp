@@ -11,7 +11,7 @@ namespace {
 Request::Request()
 {
     m_requestTimer.setSingleShot(true);
-    QObject::connect(&m_requestTimer, SIGNAL(timeout()), this, SLOT(timeout()));
+    QObject::connect(&m_requestTimer, &QTimer::timeout, this, &Request::timeout);
 }
 
 void Request::setUrl(const QString& url) {
@@ -45,7 +45,6 @@ void Request::run(Connection* connection)
         url.append(QString("&_sid=%1").arg(sid));
     }
 
-    qDebug() << url;
     setUrl(url);
 
     addHeader("Referer", referer.toUtf8());
@@ -53,11 +52,11 @@ void Request::run(Connection* connection)
     networkReply = connection->networkAccessManager()->get(m_networkRequest);
     m_requestTimer.start(REQUEST_TIMEOUT);
 
-    QObject::connect(networkReply, &QIODevice::readyRead, [this]() {
+    QObject::connect(networkReply, &QIODevice::readyRead, this, [this]() {
         responseArray.append(networkReply->readAll());
     });
 
-    QObject::connect(networkReply, &QNetworkReply::finished, [this]() {
+    QObject::connect(networkReply, &QNetworkReply::finished, this, [this]() {
         responseFinished(networkReply->error(), networkReply->errorString());
     });
 }
@@ -102,4 +101,11 @@ void Request::responseFinished(QNetworkReply::NetworkError error, QString errorS
 QList<QPair<QByteArray, QByteArray>>& Request::getResponseHeaders()
 {
     return responseHeaders;
+}
+
+Request::~Request()
+{
+    if (networkReply) {
+        networkReply->deleteLater();
+    }
 }

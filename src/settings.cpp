@@ -49,7 +49,6 @@ void Settings::setQuickconnect(const QString& value)
 {
     if (quickconnect_ != value) {
         quickconnect_ = value;
-//        m_settings->setValue(LOGIN_QUICKCONNECT_SETTINGS_PATH, value);
         emit quickconnectChanged();
     }
 }
@@ -63,7 +62,6 @@ void Settings::setUserLogin(const QString &value)
 {
     if (user_login_ != value) {
         user_login_ = value;
-//        m_settings->setValue(LOGIN_USERLOGIN_SETTINGS_PATH, value);
         emit loginChanged();
     }
 }
@@ -105,12 +103,12 @@ QString Settings::license()
     QString licenseFile = SailfishApp::pathTo(QString("LICENSE")).toLocalFile();
 
     if (!QFile::exists(licenseFile)) {
-        return "License not found.";
+        return tr("License not found.");
     }
 
     QFile file(licenseFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return "Could not open: " + licenseFile;
+        return tr("Could not open: ") + licenseFile;
 
     QTextStream in(&file);
     QString content = in.readAll();

@@ -19,7 +19,6 @@ class FileList : public QObject {
     using DataType = std::vector<FilePtr>;
 public:
     explicit FileList(QObject *qobject = nullptr);
-    virtual ~FileList();
 
     std::size_t size() const;
 

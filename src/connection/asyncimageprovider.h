@@ -22,7 +22,12 @@ public:
         requested_size_(requested_size),
         type_(type)
     {
-        id_ = cache_key.split(u'_', QString::SkipEmptyParts).first();
+        const auto parts = cache_key.split(u'_', QString::SkipEmptyParts);
+        if (parts.isEmpty()) {
+            return;
+        }
+
+        id_ = parts.first();
     }
 
     void getThumbnail() {

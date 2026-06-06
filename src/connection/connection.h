@@ -10,7 +10,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <iostream>
 #include <functional>
 
 #include "request.h"
@@ -34,11 +33,10 @@ public:
     Connection();
     virtual ~Connection() {}
 
-    int addRequest(std::shared_ptr<Request> request);
+    [[nodiscard]] int addRequest(std::shared_ptr<Request> request);
     bool runRequest(int serial);
 
     void deleteRequest(int serial);
-    void clearRequests();
 
     QNetworkAccessManager* networkAccessManager();
 

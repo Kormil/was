@@ -23,7 +23,7 @@ Connection::Connection()
 void Connection::deleteRequest(int serial)
 {
     std::lock_guard<std::mutex> lock(m_networkRequestsMutex);
-    network_requests_.erase( network_requests_.find(serial) );
+    network_requests_.erase(serial);
 }
 
 QNetworkAccessManager* Connection::networkAccessManager()
@@ -33,13 +33,8 @@ QNetworkAccessManager* Connection::networkAccessManager()
 
 int Connection::nextSerial()
 {
-    m_serial = m_serial + 1;
+    m_serial.fetch_add(1);
     return m_serial;
-}
-
-void Connection::clearRequests()
-{
-    m_networkAccessManager->deleteLater();
 }
 
 int Connection::addRequest(std::shared_ptr<Request> request)
@@ -61,14 +56,19 @@ int Connection::addRequest(std::shared_ptr<Request> request)
 
 bool Connection::runRequest(int serial)
 {
-    std::lock_guard<std::mutex> lock(m_networkRequestsMutex);
+    RequestPtr request;
+    {
+        std::lock_guard<std::mutex> lock(m_networkRequestsMutex);
 
-    auto request_it = network_requests_.find(serial);
-    if (request_it == network_requests_.end()) {
-        return false;
+        auto request_it = network_requests_.find(serial);
+        if (request_it == network_requests_.end()) {
+            return false;
+        }
+
+        request = request_it->second;
     }
 
-    request_it->second->run(this);
+    request->run(this);
     return true;
 }
 

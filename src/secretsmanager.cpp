@@ -202,7 +202,7 @@ void SecretsManager::readFromSecretsManager(const QString& name, const std::func
 
 void SecretsManager::deleteFromSecretsManager(const QString& name, const std::function<void(bool)> &handler) {
     if (!collection_exists_) {
-        return handler("");
+        return handler(false);
     }
 
     Sailfish::Secrets::Secret::Identifier identifier(

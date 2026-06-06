@@ -13,12 +13,13 @@
 
 FilesManager::FilesManager(const ConnectionPtr& connection) :
     connection_(connection) {
-    file_lists_iterator_ = file_lists_.begin();
 }
 
 void FilesManager::clear() {
+    std::lock_guard lock{file_list_iterator_mutex_};
+
     file_lists_.clear();
-    file_lists_iterator_ = file_lists_.begin();
+    file_lists_index_ = 0;
 }
 
 std::size_t FilesManager::size() const {
@@ -28,11 +29,11 @@ std::size_t FilesManager::size() const {
 void FilesManager::pop() {
     std::lock_guard lock{file_list_iterator_mutex_};
 
-    if (file_lists_iterator_ == file_lists_.begin()) {
+    if (file_lists_index_ == 0) {
         return ;
     }
 
-    --file_lists_iterator_;
+    --file_lists_index_;
 }
 
 void FilesManager::getItemsCounterForParent(const FileListPtr &files) {
@@ -101,12 +102,12 @@ void FilesManager::getFolderSize(IdType folder_id) {
 void FilesManager::cleanCurrentStack(int index)
 {
     // it is last item
-    if (index < 0 || index == file_lists_.size() - 1) {
+    if (index < 0 || static_cast<std::size_t>(index) + 1 >= file_lists_.size()) {
         return;
     }
 
-    file_lists_iterator_ = file_lists_.erase(file_lists_.begin() + index + 1, file_lists_.end());
-    --file_lists_iterator_;
+    file_lists_.erase(file_lists_.begin() + index + 1, file_lists_.end());
+    file_lists_index_ = file_lists_.size() - 1;
 }
 
 FileListPtr FilesManager::getItems(IdType folder_id) {
@@ -172,8 +173,6 @@ FilePtr FilesManager::getFile(IdType file_id) {
 }
 
 int FilesManager::findLeaf(int folder_id) {
-    std::lock_guard lock{find_leaf_mutex_};
-
     for (std::size_t i = 0; i < file_lists_.size(); ++i) {
         if (file_lists_[i].id == folder_id) {
             return i;
@@ -195,9 +194,7 @@ int FilesManager::findLeaf(int folder_id) {
     int index = file_lists_.size();
     file_lists_.push_back(l);
 
-    // set iterator on last element :(
-    file_lists_iterator_ = file_lists_.end();
-    --file_lists_iterator_;
+    file_lists_index_ = file_lists_.size() - 1;
 
     return index;
 }

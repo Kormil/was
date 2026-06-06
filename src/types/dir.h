@@ -44,13 +44,13 @@ signals:
     void urlChanged();
 
 private:
-    IdType id_;
+    IdType id_ = 0;
     IdType parent_id_;
     QString name_;
     QString path_;
     QString cache_key_;
-    int count_items_;
-    int count_folders_;
+    int count_items_ = 0;
+    int count_folders_ = 0;
 
     bool has_thumbnail_ = false;
 };

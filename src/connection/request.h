@@ -35,10 +35,7 @@ public:
     void addHeader(const QByteArray& key, const QByteArray& value);
     QList<QPair<QByteArray, QByteArray> > &getResponseHeaders();
 
-    ~Request()
-    {
-        networkReply->deleteLater();
-    }
+    ~Request();
 
     int serial() const;
     void setSerial(int serial);

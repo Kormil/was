@@ -49,7 +49,7 @@ signals:
     void cacheKeyChanged();
 
 private:
-    IdType id_;
+    IdType id_ = 0;
     IdType parent_id_;
     QString name_;
     QString cache_key_;

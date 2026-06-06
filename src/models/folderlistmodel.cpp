@@ -12,6 +12,8 @@ FolderListModel::FolderListModel(QObject *parent) :
 
 int FolderListModel::rowCount(const QModelIndex &parent) const
 {
+    std::shared_lock lck{files_mtx_};
+
     if (parent.isValid()) {
         return 0;
     }
@@ -30,20 +32,26 @@ int FolderListModel::rowCount(const QModelIndex &parent) const
 }
 
 void FolderListModel::clear() {
+    std::unique_lock lck{files_mtx_};
+
     setFiles(nullptr);
     setFolders(nullptr);
 }
 
 QVariant FolderListModel::data(const QModelIndex &index, int role) const
 {
+    std::shared_lock lck{files_mtx_};
+
     if (!index.isValid() || files_ == nullptr || folders_ == nullptr) {
         return QVariant();
     }
 
     FilePtr file;
     if (index.row() < folders_->size()) {
-        file = folders_->getByIndex(index.row());
-    } else {
+        if (folders_ != nullptr) {
+            file = folders_->getByIndex(index.row());
+        }
+    } else if (files_ != nullptr) {
         file = files_->getByIndex(index.row() - folders_->size());
     }
 
@@ -101,7 +109,7 @@ QHash<int, QByteArray> FolderListModel::roleNames() const
 
 void FolderListModel::setFiles(const FileListPtr &files)
 {
-    std::lock_guard lck{files_mtx_};
+    std::unique_lock lck{files_mtx_};
 
     if (files == files_) {
         return;
@@ -155,7 +163,7 @@ void FolderListModel::setFiles(const FileListPtr &files)
 
 void FolderListModel::setFolders(const FileListPtr &files)
 {
-    std::lock_guard lck{folders_mtx_};
+    std::unique_lock lck{files_mtx_};
 
     if (files == folders_) {
         return;
@@ -195,6 +203,8 @@ void FolderListModel::setFolders(const FileListPtr &files)
 
 bool FolderListModel::canFetchMore(const QModelIndex &parent) const
 {
+    std::shared_lock lck{files_mtx_};
+
     if (parent.isValid() || !files_) {
         return false;
     }
@@ -241,5 +251,6 @@ void FolderListModel::setFolderId(int id) {
 }
 
 int FolderListModel::mapToFileListModel(int index) const {
+    std::shared_lock lck{files_mtx_};
     return index - folders_->size();
 }

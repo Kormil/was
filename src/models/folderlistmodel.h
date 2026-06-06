@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
@@ -49,8 +50,7 @@ signals:
     void folderIdChanged();
 
 private:
-    std::mutex files_mtx_;
-    std::mutex folders_mtx_;
+    mutable std::shared_mutex files_mtx_;
 
     FileListPtr folders_;
     FileListPtr files_;

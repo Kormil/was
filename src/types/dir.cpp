@@ -29,8 +29,9 @@ void Dir::fromJson(QJsonObject &json) {
 
             if (!cache_key_.contains("_")) {
                 cache_key_ = QString::number(id_) + "_" + cache_key_;
-                has_thumbnail_ = true;
             }
+
+            has_thumbnail_ = true;
         }
     }
 }

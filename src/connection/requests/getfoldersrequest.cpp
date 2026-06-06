@@ -62,5 +62,5 @@ FileListPtr GetFoldersRequest::parseAnswer(const QJsonDocument &jsonDocument) {
         }
     }
 
-    return std::move(files);
+    return files;
 }
