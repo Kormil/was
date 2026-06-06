@@ -50,8 +50,6 @@ signals:
     void folderIdChanged();
 
 private:
-    mutable std::shared_mutex files_mtx_;
-
     FileListPtr folders_;
     FileListPtr files_;
 

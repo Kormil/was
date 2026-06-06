@@ -50,7 +50,7 @@ signals:
 
 private:
     IdType id_ = 0;
-    IdType parent_id_;
+    IdType parent_id_ = 0;
     QString name_;
     QString cache_key_;
     QString create_time_;

@@ -33,8 +33,7 @@ QNetworkAccessManager* Connection::networkAccessManager()
 
 int Connection::nextSerial()
 {
-    m_serial.fetch_add(1);
-    return m_serial;
+    return m_serial.fetch_add(1) + 1;
 }
 
 int Connection::addRequest(std::shared_ptr<Request> request)

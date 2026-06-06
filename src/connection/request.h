@@ -54,7 +54,7 @@ private slots:
 private:
     QNetworkRequest m_networkRequest;
     QTimer m_requestTimer;
-    QNetworkReply* networkReply;
+    QNetworkReply* networkReply = nullptr;
     QByteArray responseArray;
     QList<QPair<QByteArray, QByteArray>> responseHeaders;
     int m_serial;

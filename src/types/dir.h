@@ -45,7 +45,7 @@ signals:
 
 private:
     IdType id_ = 0;
-    IdType parent_id_;
+    IdType parent_id_ = 0;
     QString name_;
     QString path_;
     QString cache_key_;

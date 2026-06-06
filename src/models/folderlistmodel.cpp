@@ -12,8 +12,6 @@ FolderListModel::FolderListModel(QObject *parent) :
 
 int FolderListModel::rowCount(const QModelIndex &parent) const
 {
-    std::shared_lock lck{files_mtx_};
-
     if (parent.isValid()) {
         return 0;
     }
@@ -32,21 +30,18 @@ int FolderListModel::rowCount(const QModelIndex &parent) const
 }
 
 void FolderListModel::clear() {
-    std::unique_lock lck{files_mtx_};
-
     setFiles(nullptr);
     setFolders(nullptr);
 }
 
 QVariant FolderListModel::data(const QModelIndex &index, int role) const
 {
-    std::shared_lock lck{files_mtx_};
-
-    if (!index.isValid() || files_ == nullptr || folders_ == nullptr) {
+    if (!index.isValid()) {
         return QVariant();
     }
 
     FilePtr file;
+
     if (index.row() < folders_->size()) {
         if (folders_ != nullptr) {
             file = folders_->getByIndex(index.row());
@@ -109,13 +104,12 @@ QHash<int, QByteArray> FolderListModel::roleNames() const
 
 void FolderListModel::setFiles(const FileListPtr &files)
 {
-    std::unique_lock lck{files_mtx_};
-
     if (files == files_) {
         return;
     }
 
     beginResetModel();
+
 
     if (files_) {
         files_->disconnect(this);
@@ -158,18 +152,18 @@ void FolderListModel::setFiles(const FileListPtr &files)
         });
     }
 
+
     endResetModel();
 }
 
 void FolderListModel::setFolders(const FileListPtr &files)
 {
-    std::unique_lock lck{files_mtx_};
-
     if (files == folders_) {
         return;
     }
 
     beginResetModel();
+
 
     if (folders_) {
         folders_->disconnect(this);
@@ -203,8 +197,6 @@ void FolderListModel::setFolders(const FileListPtr &files)
 
 bool FolderListModel::canFetchMore(const QModelIndex &parent) const
 {
-    std::shared_lock lck{files_mtx_};
-
     if (parent.isValid() || !files_) {
         return false;
     }
@@ -251,6 +243,9 @@ void FolderListModel::setFolderId(int id) {
 }
 
 int FolderListModel::mapToFileListModel(int index) const {
-    std::shared_lock lck{files_mtx_};
+    if (folders_ == nullptr) {
+        return 0;
+    }
+
     return index - folders_->size();
 }
