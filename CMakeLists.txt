@@ -40,6 +40,7 @@ set(WAS_SOURCES
     src/types/dir.h
     src/types/image.cpp
     src/types/image.h
+    src/types/ifileprovider.h
     src/types/file.h
     src/types/filelist.cpp
     src/types/filelist.h

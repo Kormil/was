@@ -9,6 +9,7 @@
 
 #include "src/types/file.h"
 #include "src/types/filelist.h"
+#include "src/types/ifileprovider.h"
 
 struct PhotoResolution {
     unsigned int width;
@@ -18,6 +19,7 @@ struct PhotoResolution {
 class FileListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QObject* data_source READ dataSource WRITE setDataSource NOTIFY dataSourceChanged)
     Q_PROPERTY(int folder_id READ folderId WRITE setFolderId NOTIFY folderIdChanged)
 
 public:
@@ -48,6 +50,11 @@ public:
     int folderId() const;
     void setFolderId(int id);
 
+    QObject* dataSource() const;
+    void setDataSource(QObject* source);
+
+    void loadFolder();
+
     void clear();
 
 protected:
@@ -57,10 +64,14 @@ protected:
 signals:
     void filesLoaded() const;
     void folderIdChanged();
+    void dataSourceChanged();
 
 private:
     FileListPtr items_;
     int folder_id_;
+
+    IFileProvider* provider_ = nullptr;
+    bool is_provider_ready_ = false;
 };
 
 using FileListModelPtr = std::shared_ptr<FileListModel>;

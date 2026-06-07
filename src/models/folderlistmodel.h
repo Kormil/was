@@ -11,10 +11,12 @@
 
 #include "src/types/file.h"
 #include "src/types/filelist.h"
+#include "src/types/ifileprovider.h"
 
 class FolderListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QObject* data_source READ dataSource WRITE setDataSource NOTIFY dataSourceChanged)
     Q_PROPERTY(int folder_id READ folderId WRITE setFolderId NOTIFY folderIdChanged)
 
 public:
@@ -35,6 +37,11 @@ public:
     int folderId() const;
     void setFolderId(int id);
 
+    QObject* dataSource() const;
+    void setDataSource(QObject* source);
+
+    void loadFolder();
+
     Q_INVOKABLE int mapToFileListModel(int index) const;
 
 protected:
@@ -48,12 +55,16 @@ signals:
     void foldersLoaded();
 
     void folderIdChanged();
+    void dataSourceChanged();
 
 private:
     FileListPtr folders_;
     FileListPtr files_;
 
     int folder_id_;
+
+    IFileProvider* provider_ = nullptr;
+    bool is_provider_ready_ = false;
 };
 
 using FolderListModelPtr = std::shared_ptr<FolderListModel>;

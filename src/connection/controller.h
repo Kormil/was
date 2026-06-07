@@ -10,10 +10,11 @@
 
 #include "src/types/file.h"
 #include "src/types/filesmanager.h"
+#include "src/types/ifileprovider.h"
 
 class FileListModel;
 
-class Controller : public QObject
+class Controller : public QObject, public IFileProvider
 {
     Q_OBJECT
 
@@ -31,8 +32,8 @@ public:
     Q_INVOKABLE void clear(FileListModel* file_list_model);
     Q_INVOKABLE void getRootFolder();
 
-    FileListPtr getFolders(IdType id);
-    FileListPtr getItemsInFolder(IdType id);
+    FileListPtr getFolders(IdType id) override;
+    FileListPtr getItemsInFolder(IdType id) override;
 
     Q_INVOKABLE void getFolderSize(int id);
 

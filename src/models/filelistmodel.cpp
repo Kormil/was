@@ -141,8 +141,7 @@ void FileListModel::fetchMore(const QModelIndex &parent)
         return;
     }
 
-    auto& controller = Controller::instance();
-    controller.getItemsInFolder(items_->id());
+    provider_->getItemsInFolder(items_->id());
 }
 
 int FileListModel::folderId()  const {
@@ -152,8 +151,40 @@ int FileListModel::folderId()  const {
 void FileListModel::setFolderId(int id) {
     folder_id_ = id;
 
-    auto& controller = Controller::instance();
-    const auto files = controller.getItemsInFolder(folder_id_);
+    if (provider_ == nullptr) {
+        is_provider_ready_ = false;
+        return;
+    }
 
+    loadFolder();
+}
+
+QObject *FileListModel::dataSource() const
+{
+    return dynamic_cast<QObject*>(provider_);
+}
+
+void FileListModel::setDataSource(QObject *source)
+{
+    auto* provider = dynamic_cast<IFileProvider*>(source);
+    if (provider == provider_) {
+        return;    if (!is_provider_ready_ && provider_ != nullptr) {
+            is_provider_ready_ = true;
+            loadFolder();
+        }
+    }
+
+    provider_ = provider;
+    emit dataSourceChanged();
+
+    if (!is_provider_ready_ && provider_ != nullptr) {
+        is_provider_ready_ = true;
+        loadFolder();
+    }
+}
+
+void FileListModel::loadFolder() {
+    const auto files = provider_->getItemsInFolder(folder_id_);
     setList(files);
 }
+

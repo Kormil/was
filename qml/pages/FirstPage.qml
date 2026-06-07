@@ -21,6 +21,7 @@ Page {
 
     FolderListModel {
         id: folderListModel
+        data_source: Controller
     }
 
     Connections {

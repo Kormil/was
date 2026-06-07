@@ -23,6 +23,7 @@ Page {
 
     ShowPictureModel {
         id: fileListModel
+        data_source: Controller
         folder_id: download_id
     }
 

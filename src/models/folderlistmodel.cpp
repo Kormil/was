@@ -1,6 +1,6 @@
 #include "folderlistmodel.h"
 
-#include "src/connection/controller.h"
+#include "src/types/ifileprovider.h"
 #include "src/models/filelistmodel.h"
 
 FolderListModel::FolderListModel(QObject *parent) :
@@ -206,14 +206,13 @@ bool FolderListModel::canFetchMore(const QModelIndex &parent) const
 
 void FolderListModel::fetchMore(const QModelIndex &parent)
 {
-    if (parent.isValid() || !files_) {
+    if (parent.isValid() || !files_ || provider_ == nullptr) {
         return;
     }
 
     emit filesLoading();
 
-    auto& controller = Controller::instance();
-    controller.getItemsInFolder(files_->id());
+    provider_->getItemsInFolder(files_->id());
 }
 
 FileListPtr FolderListModel::folders() const {
@@ -231,15 +230,36 @@ int FolderListModel::folderId()  const {
 void FolderListModel::setFolderId(int id) {
     folder_id_ = id;
 
-    emit filesLoading();
-    emit foldersLoading();
+    if (provider_ == nullptr) {
+        is_provider_ready_ = false;
+        return;
+    }
 
-    auto& controller = Controller::instance();
-    const auto folders = controller.getFolders(folder_id_);
-    const auto files = controller.getItemsInFolder(folder_id_);
+    loadFolder();
+}
 
-    setFolders(folders);
-    setFiles(files);
+QObject *FolderListModel::dataSource() const
+{
+    return dynamic_cast<QObject*>(provider_);
+}
+
+void FolderListModel::setDataSource(QObject *source)
+{
+    auto* provider = dynamic_cast<IFileProvider*>(source);
+    if (provider == provider_) {
+        return;    if (!is_provider_ready_ && provider_ != nullptr) {
+            is_provider_ready_ = true;
+            loadFolder();
+        }
+    }
+
+    provider_ = provider;
+    emit dataSourceChanged();
+
+    if (!is_provider_ready_ && provider_ != nullptr) {
+        is_provider_ready_ = true;
+        loadFolder();
+    }
 }
 
 int FolderListModel::mapToFileListModel(int index) const {
@@ -248,4 +268,15 @@ int FolderListModel::mapToFileListModel(int index) const {
     }
 
     return index - folders_->size();
+}
+
+void FolderListModel::loadFolder() {
+    emit filesLoading();
+    emit foldersLoading();
+
+    const auto folders = provider_->getFolders(folder_id_);
+    const auto files = provider_->getItemsInFolder(folder_id_);
+
+    setFolders(folders);
+    setFiles(files);
 }

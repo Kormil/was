@@ -23,6 +23,7 @@ Page {
 
     FolderListModel {
         id: folderListModel
+        data_source: Controller
         folder_id: download_id
     }
 
